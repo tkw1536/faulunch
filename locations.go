@@ -1,5 +1,10 @@
 package faulunch
 
+import (
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
+)
+
 type Location string
 
 const (
@@ -24,6 +29,14 @@ const (
 	WohnanlageHartmannstr    Location = "wohnanlage-hartmannstr"
 	WohnanlageStPeter        Location = "wohnanlage-st-peter"
 )
+
+func Locations() []Location {
+	keys := maps.Keys(locations)
+	slices.SortFunc(keys, func(a, b Location) bool {
+		return locations[a] < locations[b]
+	})
+	return keys
+}
 
 var locations = map[Location]int{
 	MensaSued:                1,
