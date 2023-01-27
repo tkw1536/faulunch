@@ -46,7 +46,7 @@ func main() {
 
 	// fetch all the items
 	{
-		failed := faulunch.SyncAll(&log, db)
+		failed := faulunch.FetchAndSyncAll(&log, db)
 		if failed {
 			panic("failed to sync all locations")
 		}

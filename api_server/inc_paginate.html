@@ -1,0 +1,42 @@
+<ul>
+    {{ $context := . }}
+
+    {{ range .Pagination.Head }}
+        <li>
+           {{ $context.Link . }}
+        </li>
+    {{ end }}
+
+    {{ if (and .Pagination.Prev .Pagination.Head) }}
+        <li>...</li>
+    {{ end }}
+    
+    {{ range .Pagination.Prev }}
+        <li>
+            {{ $context.Link . }}
+        </li>
+    {{ end }}
+
+    <li>
+        <b>
+            {{ $context.Link .Pagination.Now }}
+        </b>
+    </li>
+
+    {{ range .Pagination.Next }}
+    <li>
+        {{ $context.Link . }}
+    </li>
+    {{ end }}
+
+    {{ if (and .Pagination.Next .Pagination.Tail) }}
+        <li>...</li>
+    {{ end }}
+
+    {{ range .Pagination.Tail }}
+        <li>
+            {{ $context.Link . }}
+        </li>
+    {{ end }}
+
+</ul>

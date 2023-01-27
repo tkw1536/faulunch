@@ -1,64 +1,88 @@
 package faulunch
 
 import (
-	"database/sql"
-	"time"
+	"strconv"
+	"strings"
 
-	"github.com/rs/zerolog"
-	"gorm.io/gorm"
+	"gorm.io/datatypes"
 )
 
+// MenuItem represents a single item on a menu
 type MenuItem struct {
 	ID uint `gorm:"primaryKey"`
 
-	Day      time.Time `gorm:"index"` // the day this item is for
-	Location Location  `gorm:"index"` // the location this item is for
+	Day      Day      `gorm:"index"` // the day this item is for
+	Location Location `gorm:"index"` // the location this item is for
 
-	English sql.NullBool `gorm:"not null"` // is this item in english or german?
+	Category string `gorm:"index"` // line this item is in
 
-	Category string // line this item is in
-	Title    string // title of this item
+	TitleDE string // title of this item in english
+	TitleEN string // title of this item in german
 
-	Description string // description of this item
-	Beilagen    string // sides
+	DescriptionDE string // description of this item (german)
+	DescriptionEN string // description of this item (english)
 
-	Preis1 float64 // price (student)
-	Preis2 float64 // price (employee)
-	Preis3 float64 // price (guest)
+	BeilagenDE string // sides (de)
+	BeilagenEN string // sides (en)
 
-	Piktogramme   string // TODO: List of images, properly parsed
-	Kj            float64
-	Kcal          float64
-	Fett          float64
-	Gesfett       float64
-	Kh            float64
-	Zucker        float64
-	Ballaststoffe float64
-	Eiweiss       float64
-	Salz          float64
+	Preis1 LPrice // price (student)
+	Preis2 LPrice // price (employee)
+	Preis3 LPrice // price (guest)
+
+	Piktogramme   datatypes.JSONType[[]Ingredient]
+	Kj            LFloat
+	Kcal          LFloat
+	Fett          LFloat
+	Gesfett       LFloat
+	Kh            LFloat
+	Zucker        LFloat
+	Ballaststoffe LFloat
+	Eiweiss       LFloat
+	Salz          LFloat
 }
 
-// SyncAll syncs all items from the server
-func SyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
-	for _, location := range Locations() {
-		if Sync(logger, location, true, db) != nil {
-			failed = true
-		}
-		if Sync(logger, location, false, db) != nil {
-			failed = true
-		}
-	}
-	return failed
+func (m MenuItem) Ingredients() []Ingredient {
+	return m.Piktogramme.Data
 }
 
-func Sync(logger *zerolog.Logger, location Location, english bool, db *gorm.DB) error {
-	// Fetch data from the source
-	plan, err := Fetch(location, english)
-	logger.Err(err).Str("location", string(location)).Bool("english", english).Msg("fetching data")
-	if err != nil {
-		return err
+func (m MenuItem) catScore() int {
+	switch {
+	case strings.HasPrefix(m.Category, "Essen "):
+		return -3
+	case strings.HasPrefix(m.Category, "Aktionsessen "):
+		return -2
+	case strings.HasPrefix(m.Category, "Suppe "):
+		return -1
+	default:
+		return 0
 	}
+}
+func (m MenuItem) Less(other MenuItem) bool {
+	ours, theirs := m.catScore(), other.catScore()
+	if ours < theirs {
+		return true
+	} else if ours > theirs {
+		return false
+	}
+	return m.Category < other.Category
+}
 
-	// and sync it!
-	return plan.Sync(logger, db, english)
+type LPrice float64
+
+func (lp LPrice) DEString() string {
+	return strings.ReplaceAll(lp.ENString(), ".", ",")
+}
+func (lp LPrice) ENString() string {
+	return strconv.FormatFloat(float64(lp), 'f', 2, 64)
+}
+
+// LFloat represents a localized float
+type LFloat float64
+
+func (lf LFloat) DEString() string {
+	return strings.ReplaceAll(lf.ENString(), ".", ",")
+}
+func (lf LFloat) ENString() string {
+	value := strconv.FormatFloat(float64(lf), 'f', 5, 64)
+	return strings.TrimRight(value, "0.")
 }
