@@ -103,6 +103,6 @@ func init() {
 
 	flag.StringVar(&flagAddr, "addr", flagAddr, "Address to bind to")
 	flag.StringVar(&flagDEText, "legal-de", flagDEText, "text for german legal link")
-	flag.StringVar(&flagDEText, "legal-en", flagENText, "text for english legal link")
+	flag.StringVar(&flagENText, "legal-en", flagENText, "text for english legal link")
 	flag.StringVar(&flagLink, "legal-link", flagLink, "url for legal link")
 }
