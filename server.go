@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -53,6 +54,8 @@ var matcher = language.NewMatcher([]language.Tag{
 	language.English,
 })
 
+var regexpValidLocation = regexp.MustCompile("^[aA-zZ0-9-_]+$")
+
 func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	server.init.Do(func() {
 		server.router = httprouter.New()
@@ -60,8 +63,7 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		server.router.ServeFiles("/static/*filepath", apiServerFS)
 
 		server.router.Handle(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-			accept := r.Header.Get("Accept-Language")
-			tag, _ := language.MatchStrings(matcher, accept)
+			tag, _ := language.MatchStrings(matcher, r.Header.Get("Accept-Language"))
 			if tag == language.German {
 				http.Redirect(w, r, "/de/", http.StatusTemporaryRedirect)
 			} else {
@@ -76,6 +78,23 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		server.router.Handle(http.MethodGet, "/de/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			server.HandleIndex(false, w, r)
 		})
+
+		// specific locations
+		locations, _ := server.API.Locations()
+		for _, l := range locations {
+			l := string(l)
+			if !regexpValidLocation.MatchString(l) || l == "de" || l == "en" {
+				server.Logger.Warn().Str("location", l).Msg("Skipping invalid location")
+			}
+			server.router.Handle(http.MethodGet, "/"+l+"/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+				tag, _ := language.MatchStrings(matcher, r.Header.Get("Accept-Language"))
+				if tag == language.German {
+					http.Redirect(w, r, "/de/"+l+"/", http.StatusTemporaryRedirect)
+				} else {
+					http.Redirect(w, r, "/en/"+l+"/", http.StatusTemporaryRedirect)
+				}
+			})
+		}
 
 		// location
 		server.router.Handle(http.MethodGet, "/en/:location/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
