@@ -17,7 +17,8 @@ footer {
     padding-top: .5em;
 }
 
-a, a:visited {
+a,
+a:visited {
     color: blue;
 }
 
@@ -33,7 +34,8 @@ table {
     border-collapse: collapse;
 }
 
-table td, table th {
+table td,
+table th {
     border: 1px solid black;
     padding: 3px;
 }
@@ -45,6 +47,7 @@ table td:last-child {
 td.indent:before {
     content: "- ";
 }
+
 span.annot {
     font-size: small;
     vertical-align: super;
@@ -63,10 +66,12 @@ span.annot a {
     color: black;
     text-decoration: underline;
 }
-details summary { 
+
+details summary {
     cursor: pointer;
 }
-details summary > * {
+
+details summary>* {
     display: inline;
 }
 
@@ -85,10 +90,32 @@ ul.inline {
     padding: 0;
     list-style: none;
 }
+
 ul.inline li {
     display: inline;
 }
 
 ul.inline li:not(:last-child)::after {
     content: ", ";
+}
+
+/** adapted from http://ben.balter.com/2014/03/13/pages-anchor-links/ */
+a.autolink {
+    position: relative;
+    left: 0.5em;
+    opacity: 0;
+    font-size: 0.8em;
+
+    transition: opacity 0.2s ease-in-out 0.1s;
+
+    color: gray;
+    text-decoration: none;
+}
+
+h2:hover .autolink,
+h3:hover .autolink,
+h4:hover .autolink,
+h5:hover .autolink,
+h6:hover .autolink {
+    opacity: 1;
 }

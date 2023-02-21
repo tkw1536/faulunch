@@ -11,90 +11,91 @@
     <nav>
         <p>
             {{ .Alternate }}
-            
+
             {{ if $english }}
-                <a href="/en/">Back To Overview</a>
+            <a href="/en/">Back To Overview</a>
             {{ else }}
-                <a href="/de/">Zurück zur Übersicht</a>
+            <a href="/de/">Zurück zur Übersicht</a>
             {{ end }}
         </p>
     </nav>
 </header>
 
 
-{{ if $english }}
-<p>
-    This page contains a simple menu for <em>{{ $loc.Name }}</em> ({{$loc.Address}}) on {{.Day.ENHTML}}.
-</p>
+<main>
+    {{ if $english }}
+    <p>
+        This page contains a simple menu for <em>{{ $loc.Name }}</em> ({{$loc.Address}}) on {{.Day.ENHTML}}.
+    </p>
 
-<h2 id="menu">This Menu</h2>
-{{ else }}
-<p>
-    Diese Seite enthält ein einfaches Menu der <em>{{ $loc.Name }}</em> ({{$loc.Address}}) für {{.Day.DEHTML}}.
-</p>
+    <h2 id="menu">This Menu</h2>
+    {{ else }}
+    <p>
+        Diese Seite enthält ein einfaches Menu der <em>{{ $loc.Name }}</em> ({{$loc.Address}}) für {{.Day.DEHTML}}.
+    </p>
 
-<h2 id="menu">Dieses Menü</h2>
-{{ end }}
+    <h2 id="menu">Dieses Menü</h2>
+    {{ end }}
 
-<nav>
-    <ul>
-        {{ range .Items }}
+    <nav>
+        <ul>
+            {{ range .Items }}
             <li>
                 <a href="#{{ $annotate.ID .Category }}">{{ .Category }}</a>
             </li>
+            {{ end }}
+        </ul>
+    </nav>
+
+    {{ range .Items }}
+
+    <h3 id="{{ $annotate.ID .Category }}">{{ .Category }}</h3>
+
+    {{ if $english }}
+    {{ if .TitleEN }}
+    <p>{{ $annotate.Annotate .TitleEN }}</p>
+    {{ else }}
+    <p lang="de">
+        {{ $annotate.Annotate .TitleDE }}
+        <span role="note">Unfortunately this description is only available in German.</span>
+    </p>
+    {{ end }}
+    {{ else }}
+    {{ if .TitleDE }}
+    <p>{{ $annotate.Annotate .TitleDE }}</p>
+    {{ end }}
+    {{ end }}
+
+    {{ if .Ingredients }}
+    <ul class="inline">
+        {{ range .Ingredients }}
+        <li>{{ if $english }}{{ .ENDef }}{{ else }}{{ .DEDef }}{{ end }}</li>
         {{ end }}
     </ul>
-</nav>
-
-{{ range .Items }}
-
-<h3 id="{{ $annotate.ID .Category }}">{{ .Category }}</h3>
-
-{{ if $english }}
-{{ if .TitleEN }}
-<p>{{ $annotate.Annotate .TitleEN }}</p>
-{{ else }}
-<p lang="de">
-    {{ $annotate.Annotate .TitleDE }}
-    <span role="note">Unfortunately this description is only available in German.</span>
-</p>
-{{ end }}
-{{ else }}
-{{ if .TitleDE }}
-<p>{{ $annotate.Annotate .TitleDE }}</p>
-{{ end }}
-{{ end }}
-
-{{ if .Ingredients }}
-<ul class="inline">
-    {{ range .Ingredients }}
-        <li>{{ if $english }}{{ .ENDef }}{{ else }}{{ .DEDef }}{{ end }}</li>
     {{ end }}
-</ul>
-{{ end }}
 
 
-{{ if $english }}
+    {{ if $english }}
     {{ if .DescriptionEN }}
-        <p>
-            {{ $annotate.Annotate .DescriptionEN }}
-            <span role="note">Unfortunately this description is sometimes only available in German. </span>
-        </p>
+    <p>
+        {{ $annotate.Annotate .DescriptionEN }}
+        <span role="note">Unfortunately this description is sometimes only available in German. </span>
+    </p>
     {{ end }}
     {{ if .BeilagenEN }}
-        <p>
-            {{ $annotate.Annotate .BeilagenEN }}
-            <span role="note">Unfortunately this description is sometimes only available in German. </span>
-        </p>
+    <p>
+        {{ $annotate.Annotate .BeilagenEN }}
+        <span role="note">Unfortunately this description is sometimes only available in German. </span>
+    </p>
     {{ end }}
-{{ else }}
+    {{ else }}
     {{ if .DescriptionDE }}
-        <p>{{ $annotate.Annotate .DescriptionDE }}</p>
+    <p>{{ $annotate.Annotate .DescriptionDE }}</p>
     {{ end }}
     {{ if .BeilagenDE }}
-        <p>{{ $annotate.Annotate .BeilagenDE }}</p>
+    <p>{{ $annotate.Annotate .BeilagenDE }}</p>
     {{ end }}
-{{ end }}
+    {{ end }}
     <div>
         <details open>
             <summary>{{ if $english }}Price{{ else }}Preis{{ end }}</summary>
@@ -273,7 +274,7 @@
 
     {{ end }}
 
-    <h2>
+    <h2 id="legend">
         {{ if .English }}
         Ingredients, Additives &amp; Allergens
         {{ else }}
@@ -283,92 +284,92 @@
 
     <div>
         {{ if .Ingredients }}
-            <table>
-                <caption>{{ if $english }}Ingredients{{ else }}Zutaten{{ end }}</caption>
-                <thead>
-                    <tr>
-                        <th>
-                            {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
-                        </th>
-                        <th>
-                            {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{ range .Ingredients }}
-                    <tr id="ing-{{.}}">
-                        <td>
-                            {{ . }}
-                        </td>
-                        <td>
-                            {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
-                        </td>
-                    </tr>
-                    {{ end }}
-                </tbody>
-            </table>
+        <table>
+            <caption>{{ if $english }}Ingredients{{ else }}Zutaten{{ end }}</caption>
+            <thead>
+                <tr>
+                    <th>
+                        {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
+                    </th>
+                    <th>
+                        {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .Ingredients }}
+                <tr id="ing-{{.}}">
+                    <td>
+                        {{ . }}
+                    </td>
+                    <td>
+                        {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
         {{ end }}
 
         {{ if .Additives }}
-            <table>
-                <caption>{{ if $english }}Additives{{ else }}Additive{{ end }}</caption>
-                <thead>
-                    <tr>
-                        <th>
-                            {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
-                        </th>
-                        <th>
-                            {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{ range .Additives }}
-                        <tr id="add-{{.}}">
-                            <td>
-                                {{ . }}
-                            </td>
-                            <td>
-                                {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
-                            </td>
-                        </tr>
-                    {{ end }}
-                </tbody>
-            </table>
+        <table>
+            <caption>{{ if $english }}Additives{{ else }}Additive{{ end }}</caption>
+            <thead>
+                <tr>
+                    <th>
+                        {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
+                    </th>
+                    <th>
+                        {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .Additives }}
+                <tr id="add-{{.}}">
+                    <td>
+                        {{ . }}
+                    </td>
+                    <td>
+                        {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
         {{ end }}
-    
+
         {{ if .Allergens }}
-            <table>
-                <caption>{{ if $english }}Allergens{{ else }}Allergene{{ end }}</caption>
-                <thead>
-                    <tr>
-                        <th>
-                            {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
-                        </th>
-                        <th>
-                            {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{ range .Allergens }}
-                        <tr id="all-{{.}}">
-                            <td>
-                                {{ . }}
-                            </td>
-                            <td>
-                                {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
-                            </td>
-                        </tr>
-                    {{ end }}
-                </tbody>
-            </table>
+        <table>
+            <caption>{{ if $english }}Allergens{{ else }}Allergene{{ end }}</caption>
+            <thead>
+                <tr>
+                    <th>
+                        {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
+                    </th>
+                    <th>
+                        {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .Allergens }}
+                <tr id="all-{{.}}">
+                    <td>
+                        {{ . }}
+                    </td>
+                    <td>
+                        {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
         {{ end }}
     </div>
 
 
-    <h2>
+    <h2 id="other">
         {{ if .English }}
         Other Menus
         {{ else }}
@@ -380,4 +381,5 @@
         {{ template "inc_paginate.html" . }}
     </div>
 
+</main>
 {{ template "inc_footer.html" . }}
