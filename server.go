@@ -156,10 +156,10 @@ func (gc globalContext) Alternate() template.HTML {
 	var lang, title string
 	if gc.English {
 		alternate = strings.ReplaceAll(alternate, "/en/", "/de/")
-		lang, title = "de", "Deutsche Version"
+		lang, title = "de", "🇩🇪 Deutsche Version"
 	} else {
 		alternate = strings.ReplaceAll(alternate, "/de/", "/en/")
-		lang, title = "en", "English Version"
+		lang, title = "en", "🇬🇧 English Version"
 	}
 
 	return template.HTML("<a href='" + alternate + "' rel='alternate' lang='" + lang + "'>" + title + "</a>")
