@@ -84,5 +84,5 @@ func (lf LFloat) DEString() string {
 }
 func (lf LFloat) ENString() string {
 	value := strconv.FormatFloat(float64(lf), 'f', 5, 64)
-	return strings.TrimRight(value, "0.")
+	return strings.TrimSuffix(strings.TrimRight(value, "0"), ".")
 }
