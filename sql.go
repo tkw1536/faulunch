@@ -9,10 +9,10 @@ import (
 
 // MenuItem represents a single item on a menu
 type MenuItem struct {
-	ID uint `gorm:"primaryKey"`
+	ID uint `gorm:"primaryKey" json:"-"`
 
-	Day      Day      `gorm:"index"` // the day this item is for
-	Location Location `gorm:"index"` // the location this item is for
+	Day      Day      `gorm:"index" json:"-"` // the day this item is for
+	Location Location `gorm:"index" json:"-"` // the location this item is for
 
 	Category string `gorm:"index"` // line this item is in
 
@@ -82,6 +82,7 @@ type LFloat float64
 func (lf LFloat) DEString() string {
 	return strings.ReplaceAll(lf.ENString(), ".", ",")
 }
+
 func (lf LFloat) ENString() string {
 	value := strconv.FormatFloat(float64(lf), 'f', 5, 64)
 	return strings.TrimSuffix(strings.TrimRight(value, "0"), ".")

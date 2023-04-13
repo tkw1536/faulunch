@@ -161,6 +161,13 @@ func reverse[S ~[]E, E any](s S) {
 	}
 }
 
+// Days returns the list of days for the available location
+func (api *API) Days(location Location) (days []Day, err error) {
+	res := api.DB.Model(&MenuItem{}).Where("Location = ?", location).Order("day DESC").Distinct().Pluck("day", &days)
+	err = res.Error
+	return
+}
+
 // MenuItems returns the menu items for the given day and time.
 // They are sorted by category.
 // If it does not exist, an empty menu item is returned.

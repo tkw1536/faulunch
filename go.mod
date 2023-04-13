@@ -7,7 +7,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/rs/zerolog v1.29.0
 	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
-	golang.org/x/text v0.7.0
+	golang.org/x/text v0.8.0
 	gorm.io/datatypes v1.1.0
 	gorm.io/gorm v1.24.5
 )
@@ -22,6 +22,8 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
+	github.com/swaggest/swgui v1.6.2 // indirect
+	github.com/vearutop/statigz v1.2.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	gorm.io/driver/mysql v1.4.7 // indirect
 	modernc.org/libc v1.22.2 // indirect

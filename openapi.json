@@ -1,0 +1,419 @@
+{
+   "openapi": "3.0.0",
+   "info": {
+      "title": "FauLunch API",
+      "description": "This API provides information about the current, past and future menus of serveries related to FAU.\n",
+      "version": "1.0.0"
+   },
+   "servers": [
+      {
+         "url": "/api/v1"
+      }
+   ],
+   "tags": [
+      {
+         "name": "locations",
+         "description": "List available locations"
+      },
+      {
+         "name": "menu",
+         "description": "Access menus"
+      }
+   ],
+   "paths": {
+      "/locations": {
+         "get": {
+            "tags": [
+               "locations"
+            ],
+            "summary": "List all available locations",
+            "description": "Get a list of available locations. Returned in consistent order.",
+            "responses": {
+               "200": {
+                  "description": "List succeeded",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "array",
+                           "description": "List of available locations",
+                           "items": {
+                              "$ref": "#/components/schemas/Location"
+                           }
+                        }
+                     }
+                  }
+               },
+               "500": {
+                  "description": "List failed",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/InternalServerError"
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      },
+      "/menu/{locationID}": {
+         "get": {
+            "tags": [
+               "menu"
+            ],
+            "summary": "Return a list of available menu times.",
+            "description": "Return a list of available dates in reverse order, with the newest first.",
+            "parameters": [
+               {
+                  "in": "path",
+                  "name": "locationID",
+                  "example": "mensa-sued",
+                  "schema": {
+                     "type": "string"
+                  },
+                  "required": true,
+                  "description": "ID of location to list available menu times for."
+               }
+            ],
+            "responses": {
+               "200": {
+                  "description": "Available dates",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "array",
+                           "description": "Available list of dates, newest first.",
+                           "items": {
+                              "type": "number",
+                              "description": "Unix timestamp representing the start of day in local timezone.",
+                              "example": 1682028000
+                           }
+                        }
+                     }
+                  }
+               },
+               "404": {
+                  "description": "Location Not Found",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/NotFoundError"
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      },
+      "/menu/{locationID}/{day}": {
+         "get": {
+            "tags": [
+               "menu"
+            ],
+            "summary": "Return the menu for the given location and day",
+            "description": "Returns the menu for the given day",
+            "parameters": [
+               {
+                  "in": "path",
+                  "name": "locationID",
+                  "example": "mensa-sued",
+                  "schema": {
+                     "type": "string"
+                  },
+                  "required": true,
+                  "description": "ID of location to get menu for."
+               },
+               {
+                  "in": "path",
+                  "name": "day",
+                  "example": 1682028000,
+                  "schema": {
+                     "type": "number"
+                  },
+                  "required": true,
+                  "description": "Day to get menu for"
+               }
+            ],
+            "responses": {
+               "200": {
+                  "description": "Available menu items",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "type": "array",
+                           "description": "list of available menu items",
+                           "items": {
+                              "$ref": "#/components/schemas/MenuItem"
+                           }
+                        }
+                     }
+                  }
+               },
+               "404": {
+                  "description": "Location or day Not Found",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/NotFoundError"
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   },
+   "components": {
+      "schemas": {
+         "Location": {
+            "type": "object",
+            "description": "A single FAULunch location",
+            "required": [
+               "id",
+               "Name",
+               "Refactory",
+               "Cafe",
+               "Internal",
+               "Street",
+               "StreetNo",
+               "ZIP",
+               "City"
+            ],
+            "properties": {
+               "id": {
+                  "type": "string",
+                  "description": "ID of the location",
+                  "example": "mensa-sued"
+               },
+               "Name": {
+                  "type": "string",
+                  "description": "Name of the location",
+                  "example": "Südmensa"
+               },
+               "Refactory": {
+                  "type": "boolean",
+                  "description": "Is this location a full refactory?",
+                  "example": true
+               },
+               "Cafe": {
+                  "type": "boolean",
+                  "description": "Is this location a cafe?",
+                  "example": false
+               },
+               "Internal": {
+                  "type": "boolean",
+                  "description": "Does this location accept specific visitor only?",
+                  "example": false
+               },
+               "Street": {
+                  "type": "string",
+                  "description": "Street name part of the address",
+                  "example": "Erwin-Rommel-Straße"
+               },
+               "StreetNo": {
+                  "type": "string",
+                  "description": "Street number part of the address",
+                  "example": "60"
+               },
+               "City": {
+                  "type": "string",
+                  "description": "City of the address",
+                  "example": "Erlangen"
+               },
+               "ZIP": {
+                  "type": "string",
+                  "description": "ZIP code of the address",
+                  "example": "91058"
+               }
+            }
+         },
+         "MenuItem": {
+            "type": "object",
+            "required": [
+               "Category",
+               "TitleDE",
+               "TitleEN",
+               "DescriptionDE",
+               "DescriptionEN",
+               "BeilagenDE",
+               "BeilagenEN",
+               "Preis1",
+               "Preis2",
+               "Preis3",
+               "Piktogramme",
+               "Kj",
+               "Kcal",
+               "Fett",
+               "Gesfett",
+               "Kh",
+               "Zucker",
+               "Ballaststoffe",
+               "Eiweiss",
+               "Salz"
+            ],
+            "properties": {
+               "Category": {
+                  "type": "string",
+                  "description": "The location within the location where the menu item is available.",
+                  "example": "Essen 1"
+               },
+               "TitleDE": {
+                  "type": "string",
+                  "description": "The German title of the food item",
+                  "example": "Apfelstrudel (1,7,Wz,Mi) mit Vanillesoße (Mi)"
+               },
+               "TitleEN": {
+                  "type": "string",
+                  "description": "The English title of the food item",
+                  "example": "Apple strudel (1,7,Wz,Mi) with vanilla sauce (Mi)"
+               },
+               "DescriptionDE": {
+                  "type": "string",
+                  "description": "The German description of the food item"
+               },
+               "DescriptionEN": {
+                  "type": "string",
+                  "description": "The English description of the food item"
+               },
+               "BeilagenDE": {
+                  "type": "string",
+                  "description": "The German side dishes of the food item"
+               },
+               "BeilagenEN": {
+                  "type": "string",
+                  "description": "The English side dishes of the food item"
+               },
+               "Preis1": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "Price of the item for students in euros.",
+                  "example": 2.28
+               },
+               "Preis2": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "Price of the item for employees in euros.",
+                  "example": 3.8
+               },
+               "Preis3": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "Price of the item for guests in euros.",
+                  "example": 4.56
+               },
+               "Piktogramme": {
+                  "type": "array",
+                  "items": {
+                     "$ref": "#/components/schemas/Ingredient"
+                  },
+                  "description": "Ingredients of the item. Typically displayed as pictograms."
+               },
+               "Kj": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The amount of energy in kilo jules",
+                  "example": 3690
+               },
+               "Kcal": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The amount of energy in kilo calories",
+                  "example": 881
+               },
+               "Fett": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "amount of fat in grams",
+                  "example": 41.6
+               },
+               "Gesfett": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "amount of saturated fatty acids in grams",
+                  "example": 23.6
+               },
+               "Kh": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "amount of carbohydrates in grams",
+                  "example": 107.9
+               },
+               "Zucker": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "amount of sugar in grams",
+                  "example": 56.9
+               },
+               "Ballaststoffe": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "amount of dietary fibre in grams",
+                  "example": 0
+               },
+               "Eiweiss": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "amount of protein in grams",
+                  "example": 14.1
+               },
+               "Salz": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "amount of salt in grams",
+                  "example": 1.2
+               }
+            }
+         },
+         "Ingredient": {
+            "type": "string",
+            "description": "An ingredient of the item. The abbreviations mean:\n\n * `S` - Pork\n * `R` - Beef\n * `G` - Poultry\n * `L` - Lamb\n * `W` - Game\n * `F` - Fish\n * `V` - Vegetarian\n * `veg` - Vegan\n * `Bio` - organic (certified by DE-ÖKO-006)\n * `MSC` - sustainable fish (certified by MSC - C - 51840)\n * `O` - with alcohol\n * `Gf` - Gluten Free\n * `MV` - Mensa Vital\n * `CO2` - CO2 Neutral\n",
+            "enum": [
+               "S",
+               "R",
+               "G",
+               "L",
+               "W",
+               "F",
+               "V",
+               "veg",
+               "Bio",
+               "MSC",
+               "O",
+               "Gf",
+               "MV",
+               "CO2"
+            ]
+         },
+         "InternalServerError": {
+            "type": "object",
+            "description": "An error indicating that an internal server error occurred",
+            "required": [
+               "status"
+            ],
+            "properties": {
+               "status": {
+                  "type": "string",
+                  "enum": [
+                     "Internal Server Error"
+                  ]
+               }
+            }
+         },
+         "NotFoundError": {
+            "type": "object",
+            "description": "An error indicating that the value was not found",
+            "required": [
+               "status"
+            ],
+            "properties": {
+               "status": {
+                  "type": "string",
+                  "enum": [
+                     "Not Found"
+                  ]
+               }
+            }
+         }
+      }
+   }
+}

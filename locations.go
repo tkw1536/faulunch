@@ -1,6 +1,7 @@
 package faulunch
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/url"
@@ -10,6 +11,16 @@ import (
 )
 
 type Location string
+
+func (location *Location) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		LocationDescription `json:",inline"`
+		ID                  string `json:"id"`
+	}{
+		LocationDescription: location.Description(),
+		ID:                  string(*location),
+	})
+}
 
 const (
 	CafeteriaBaerenschanzstr Location = "cafeteria-baerenschanzstr"

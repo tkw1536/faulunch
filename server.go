@@ -120,6 +120,9 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			location := Location(p.ByName("location"))
 			server.HandleMenu(location, day, false, w, r)
 		})
+
+		// API
+		server.router.Handler(http.MethodGet, "/api/*filepath", server.handleAPI())
 	})
 
 	server.router.ServeHTTP(w, r)
