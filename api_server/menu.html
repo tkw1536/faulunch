@@ -23,6 +23,7 @@
 </header>
 
 
+{{ $needBrokenEnglishNote := false }}
 <main>
     {{ if $english }}
     <p>
@@ -58,7 +59,7 @@
     {{ else }}
     <p lang="de">
         {{ $annotate.Annotate .TitleDE }}
-        <span role="note">Unfortunately this description is only available in German.</span>
+        <span role="note" lang="en">Unfortunately this description is only available in German.</span>
     </p>
     {{ end }}
     {{ else }}
@@ -75,18 +76,19 @@
     </ul>
     {{ end }}
 
-
     {{ if $english }}
     {{ if .DescriptionEN }}
     <p>
         {{ $annotate.Annotate .DescriptionEN }}
-        <span role="note">Unfortunately this description is sometimes only available in German. </span>
+        {{ $needBrokenEnglishNote = true }}
+        <span role="note"><a href="#broken-english-note" title="Explanation why description is sometimes only available in German">Unfortunately this description is sometimes only available in German. </a></span>
     </p>
     {{ end }}
     {{ if .BeilagenEN }}
     <p>
         {{ $annotate.Annotate .BeilagenEN }}
-        <span role="note">Unfortunately this description is sometimes only available in German. </span>
+        {{ $needBrokenEnglishNote = true }}
+        <span role="note"><a href="#broken-english-note" title="Explanation why description is sometimes only available in German" role="note">Unfortunately this description is sometimes only available in German. </a></span>
     </p>
     {{ end }}
     {{ else }}
@@ -273,6 +275,16 @@
         </details>
     </div>
 
+    {{ end }}
+
+    {{ if $needBrokenEnglishNote }}
+    <div>
+        <p role="note" class="broken-english-note" id="broken-english-note">
+            It sometimes happens that specific descriptions are only available in German.
+            This is a flaw in the original data, we receive german content in fields labeled as containing english text.
+            Unfortunately we cannot detect or fix this automatically.
+        </p>
+    </div>
     {{ end }}
 
     <h2 id="legend">

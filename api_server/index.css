@@ -11,6 +11,10 @@ html {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.broken-english-note {
+    font-size: small;
+}
+
 
 footer {
     font-size: small;
