@@ -3,7 +3,6 @@ package faulunch
 import (
 	"embed"
 	"html/template"
-	"io/fs"
 	"net/http"
 	"regexp"
 	"strings"
@@ -17,15 +16,7 @@ import (
 
 //go:embed "api_server"
 var apiServerData embed.FS
-var apiServerFS = func() http.FileSystem {
-	static, err := fs.Sub(apiServerData, "api_server/static")
-	if err != nil {
-		panic(err)
-	}
-	return http.FS(static)
-}()
-
-var apiServerTemplate = template.Must(template.ParseFS(apiServerData, "api_server/*.html"))
+var apiServerTemplate = template.Must(template.ParseFS(apiServerData, "api_server/*.html", "api_server/index.js", "api_server/index.css"))
 
 type Server struct {
 	API    *API
@@ -59,8 +50,6 @@ var regexpValidLocation = regexp.MustCompile("^[aA-zZ0-9-_]+$")
 func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	server.init.Do(func() {
 		server.router = httprouter.New()
-
-		server.router.ServeFiles("/static/*filepath", apiServerFS)
 
 		server.router.Handle(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			tag, _ := language.MatchStrings(matcher, r.Header.Get("Accept-Language"))
