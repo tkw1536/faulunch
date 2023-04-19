@@ -4,10 +4,16 @@ import (
 	"flag"
 	"net/http"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/glebarez/sqlite"
 	"github.com/rs/zerolog"
+	"github.com/tdewolff/minify"
+	"github.com/tdewolff/minify/css"
+	"github.com/tdewolff/minify/html"
+	"github.com/tdewolff/minify/js"
+	"github.com/tdewolff/minify/xml"
 	"github.com/tkw1536/faulunch"
 	"gorm.io/gorm"
 )
@@ -67,9 +73,10 @@ func main() {
 		defer db.Close()
 	}
 
-	// create an api and start serving it
+	// create a server
+	var server http.Handler
 	{
-		server := faulunch.Server{
+		server = &faulunch.Server{
 			API: &faulunch.API{
 				DB: db,
 			},
@@ -80,9 +87,22 @@ func main() {
 				ENString: flagENText,
 			},
 		}
+	}
 
-		log.Info().Str("addr", flagAddr).Msg("server listening")
-		err := http.ListenAndServe(flagAddr, &server)
+	if !flagNoMinify {
+		m := minify.New()
+		m.AddFunc("text/css", css.Minify)
+		m.AddFunc("text/html", html.Minify)
+		m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
+		m.AddFuncRegexp(regexp.MustCompile("[/+]xml$"), xml.Minify) // for MathML
+
+		server = m.Middleware(server)
+	}
+
+	// start listening
+	{
+		log.Info().Str("addr", flagAddr).Bool("minify", !flagNoMinify).Msg("server listening")
+		err := http.ListenAndServe(flagAddr, server)
 		log.Err(err).Str("addr", flagAddr).Msg("server failed to listen")
 	}
 
@@ -90,6 +110,7 @@ func main() {
 
 var flagAutoSync time.Duration
 var flagDebug bool = false
+var flagNoMinify bool = false
 var flagAddr string = "127.0.0.1:3000"
 var flagLink string = "https://privacy.kwarc.info/"
 var flagDEText string = "Keine offizielle Seite des Studentenwerks. Alle Angaben, insbesondere zu Speiseplänen und Preisen, sind ohne Gewähr. Siehe auch Impressum und Datenschutz. "
@@ -100,6 +121,7 @@ func init() {
 
 	flag.DurationVar(&flagAutoSync, "sync", flagAutoSync, "automatically sync")
 	flag.BoolVar(&flagDebug, "debug", flagDebug, "Set debug log level")
+	flag.BoolVar(&flagNoMinify, "no-minify", flagNoMinify, "Do not minify sources")
 
 	flag.StringVar(&flagAddr, "addr", flagAddr, "Address to bind to")
 	flag.StringVar(&flagDEText, "legal-de", flagDEText, "text for german legal link")
