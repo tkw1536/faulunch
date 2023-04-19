@@ -3,6 +3,7 @@
 {{ $annotate := . }}
 {{ $english := .English }}
 <title>FauLunch - {{ $loc.Name }} - {{ if .English }}{{.Day.ENString}}{{ else }}{{.Day.DEString}}{{ end }}</title>
+<meta name="description" content="{{ if .English }}Menu for {{ $loc.Name }} on {{.Day.ENString}}{{ else }}Menü für {{ $loc.Name }} am {{.Day.DEString}}{{ end }}">
 
 <header>
     <h1>
