@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/glebarez/sqlite"
@@ -96,7 +97,18 @@ func main() {
 		m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
 		m.AddFuncRegexp(regexp.MustCompile("[/+]xml$"), xml.Minify) // for MathML
 
-		server = m.Middleware(server)
+		regular := server
+		minify := m.Middleware(regular)
+
+		server = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// prevent api resources from being minified
+			if r.URL.Path != "/api/" && strings.HasPrefix(r.URL.Path, "/api/") {
+				regular.ServeHTTP(w, r)
+				return
+			}
+			minify.ServeHTTP(w, r)
+		})
+
 	}
 
 	// start listening
