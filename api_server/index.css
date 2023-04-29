@@ -1,14 +1,39 @@
+:root {
+    --text: #20252A; /* used for text */
+    --link: blue; /* used for links */
+    --border: #1a1a1a; /* used for borders and things */
+    --definition: #000; /* used for definition links */
+    --autolink: grey; /* used for section links */
+    --background: white; /* used for background colors */
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text: white;
+        --link: #4DA6FF;
+        --border: #CCCCCC;
+        --definition: rgb(78, 109, 78);
+        --autolink: grey;
+        --background: #1a1a1a;
+    }
+}
+
+ul li {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
 body {
     padding: 1em;
-
     max-width: 120ch;
     margin: 0 auto;
+    color: var(--text);
 }
 
 html {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: var(--background);
 }
 
 .broken-english-note {
@@ -18,13 +43,13 @@ html {
 
 footer {
     font-size: small;
-    border-top: 1px solid black;
+    border-top: 1px solid var(--border);
     padding-top: .5em;
 }
 
 a,
 a:visited {
-    color: blue;
+    color: var(--link);
 }
 
 p {
@@ -41,7 +66,7 @@ table {
 
 table td,
 table th {
-    border: 1px solid black;
+    border: 1px solid var(--border);
     padding: 3px;
 }
 
@@ -68,7 +93,7 @@ span.annot::after {
 
 
 span.annot a {
-    color: black;
+    color: var(--definition);
     text-decoration: underline;
 }
 
@@ -86,7 +111,7 @@ details {
 
 span[role="note"] {
     font-size: small;
-    color: #1a1a1a;
+    color: var(--border);
     display: block;
 }
 
@@ -113,7 +138,7 @@ a.autolink {
 
     transition: opacity 0.2s ease-in-out 0.1s;
 
-    color: gray;
+    color: var(--autolink);
     text-decoration: none;
 }
 
