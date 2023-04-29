@@ -167,7 +167,7 @@ func (server *Server) HandleIndex(english bool, w http.ResponseWriter, r *http.R
 
 	// fetch all the items
 	results, err := server.API.Locations()
-	logger.Trace().Err(err).Msg("API.Locations")
+	logger.Debug().Err(err).Msg("API.Locations")
 
 	if err != nil || len(results) == 0 {
 		http.NotFound(w, r)
@@ -185,7 +185,7 @@ func (server *Server) HandleIndex(english bool, w http.ResponseWriter, r *http.R
 			},
 			Locations: results,
 		})
-		logger.Trace().Err(err).Msg("ExecuteTemplate")
+		logger.Debug().Err(err).Msg("ExecuteTemplate")
 	}
 }
 
@@ -228,7 +228,7 @@ func (server *Server) HandleLocation(location Location, english bool, w http.Res
 	logger := server.Logger.With().Str("route", "HandleLocation").Str("location", string(location)).Logger()
 
 	now, err := server.API.CurrentDay(location, ParseDay(time.Now()))
-	logger.Trace().Err(err).Msg("API.CurrentDay")
+	logger.Debug().Err(err).Msg("API.CurrentDay")
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -253,14 +253,14 @@ func (server *Server) HandleMenu(location Location, day Day, english bool, w htt
 
 	// fetch all the items
 	mc.Items, err = server.API.MenuItems(location, day)
-	logger.Trace().Err(err).Msg("API.MenuItems")
+	logger.Debug().Err(err).Msg("API.MenuItems")
 	if err != nil || len(mc.Items) == 0 {
 		http.NotFound(w, r)
 		return
 	}
 
 	mc.Pagination, err = server.API.DayPagination(location, day, menuPaginationSize)
-	logger.Trace().Err(err).Msg("API.DayPagination")
+	logger.Debug().Err(err).Msg("API.DayPagination")
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -272,6 +272,6 @@ func (server *Server) HandleMenu(location Location, day Day, english bool, w htt
 	{
 		w.Header().Add("Content-Type", "text/html")
 		err := apiServerTemplate.ExecuteTemplate(w, "menu.html", mc)
-		logger.Trace().Err(err).Msg("ExecuteTemplate")
+		logger.Debug().Err(err).Msg("ExecuteTemplate")
 	}
 }
