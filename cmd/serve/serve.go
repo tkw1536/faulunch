@@ -41,18 +41,17 @@ func main() {
 		panic(err)
 	}
 
+	// do the migration
+	{
+		err := db.AutoMigrate(&faulunch.MenuItem{})
+		log.Err(err).Msg("migrating database")
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	// start automatically syncing if requested
 	if flagAutoSync > 0 {
-
-		// do the migration
-		{
-			err := db.AutoMigrate(&faulunch.MenuItem{})
-			log.Err(err).Msg("migrating database")
-			if err != nil {
-				panic(err)
-			}
-		}
-
 		go func() {
 			for {
 				failed := faulunch.FetchAndSyncAll(&log, db)
@@ -62,6 +61,8 @@ func main() {
 				time.Sleep(flagAutoSync)
 			}
 		}()
+	} else {
+		faulunch.RefreshComputedFields(&log, db)
 	}
 
 	// register a close once we're done

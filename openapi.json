@@ -231,6 +231,7 @@
             "type": "object",
             "required": [
                "Category",
+               "CategoryEN",
                "TitleDE",
                "TitleEN",
                "DescriptionDE",
@@ -254,8 +255,13 @@
             "properties": {
                "Category": {
                   "type": "string",
-                  "description": "The location within the location where the menu item is available.",
+                  "description": "German (and machine name) for the line within the location where the menu item is available.",
                   "example": "Essen 1"
+               },
+               "CategoryEN": {
+                  "type": "string",
+                  "description": "English version of Category (automatically translated)",
+                  "example": "Meal 1"
                },
                "TitleDE": {
                   "type": "string",

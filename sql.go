@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/rs/zerolog"
 	"gorm.io/datatypes"
 )
 
@@ -14,7 +15,8 @@ type MenuItem struct {
 	Day      Day      `gorm:"index" json:"-"` // the day this item is for
 	Location Location `gorm:"index" json:"-"` // the location this item is for
 
-	Category string `gorm:"index"` // line this item is in
+	Category   string `gorm:"index"` // line this item is in
+	CategoryEN string // english translation of category
 
 	TitleDE string // title of this item in english
 	TitleEN string // title of this item in german
@@ -39,6 +41,38 @@ type MenuItem struct {
 	Ballaststoffe LFloat
 	Eiweiss       LFloat
 	Salz          LFloat
+}
+
+var categoryTranslations = map[string]string{
+	"Essen":        "Meal",
+	"Aktionsessen": "Special Meal",
+	"Aktion":       "Special",
+	"Suppe":        "Soup",
+	"SB-Theke":     "Self-Service Counter",
+}
+
+// UpdateComputedFields updates the computed fields
+func (m *MenuItem) UpdateComputedFields(logger *zerolog.Logger) {
+	fields := strings.Fields(m.Category)
+	for i, field := range fields {
+		trans, ok := categoryTranslations[field]
+		if ok {
+			fields[i] = trans
+		} else if !isOnlyDigits(field) {
+			logger.Debug().Str("part", field).Msg("untranslatable category part")
+		}
+	}
+
+	m.CategoryEN = strings.Join(fields, " ")
+}
+
+func isOnlyDigits(value string) bool {
+	for _, r := range value {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func (m MenuItem) Ingredients() []Ingredient {

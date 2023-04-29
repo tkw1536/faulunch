@@ -11,6 +11,7 @@ import (
 )
 
 // FetchAndSyncAll fetches and syncs all items into the database.
+// It then updates computed fields.
 // Returns a boolean indicating failure.
 func FetchAndSyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
 	for _, location := range Locations() {
@@ -18,6 +19,11 @@ func FetchAndSyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
 			failed = true
 		}
 	}
+
+	if err := RefreshComputedFields(logger, db); err != nil {
+		failed = true
+	}
+
 	return failed
 }
 
@@ -100,5 +106,25 @@ func Sync(logger *zerolog.Logger, db *gorm.DB, german, english Plan) error {
 		}
 		return nil
 	})
+}
 
+// RefreshComputedFields refreshes all computed fields in the database.
+func RefreshComputedFields(logger *zerolog.Logger, db *gorm.DB) error {
+	pageSize := 100
+
+	return db.Transaction(func(tx *gorm.DB) error {
+		var items []MenuItem
+
+		res := tx.Model(MenuItem{}).FindInBatches(&items, pageSize, func(tx *gorm.DB, batch int) error {
+			for i := range items {
+				items[i].UpdateComputedFields(logger)
+			}
+
+			res := tx.Save(&items)
+			logger.Debug().Err(res.Error).Int("batch", batch).Int("count", len(items)).Msg("refreshing computed fields batch")
+			return res.Error
+		})
+		logger.Info().Err(res.Error).Int("rowsAffected", int(res.RowsAffected)).Msg("refreshed computed fields")
+		return res.Error
+	})
 }

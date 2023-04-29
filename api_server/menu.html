@@ -43,7 +43,7 @@
         <ul>
             {{ range .Items }}
             <li>
-                <a href="#{{ $annotate.ID .Category }}">{{ .Category }}</a>
+                <a href="#{{ $annotate.ID .Category }}">{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</a>
             </li>
             {{ end }}
         </ul>
@@ -51,7 +51,7 @@
 
     {{ range .Items }}
 
-    <h3 id="{{ $annotate.ID .Category }}">{{ .Category }}</h3>
+    <h3 id="{{ $annotate.ID .Category }}">{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</h3>
 
     {{ if $english }}
     {{ if .TitleEN }}
