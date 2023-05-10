@@ -14,6 +14,15 @@ import (
 // It then updates computed fields.
 // Returns a boolean indicating failure.
 func FetchAndSyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
+	var se SyncEvent
+	se.Begin()
+	defer func() {
+		se.Finish()
+
+		res := se.Store(db)
+		logger.Err(res).Msg("logging sync event")
+	}()
+
 	for _, location := range Locations() {
 		if FetchAndSync(logger, db, location) != nil {
 			failed = true
@@ -71,7 +80,7 @@ func PlanURL(location Location, english bool) string {
 	return dest
 }
 
-// Sync syncronizes the given german and english plans into the database
+// Sync synchronizes the given german and english plans into the database
 // Any previous content for the existing days and locations is erased.
 func Sync(logger *zerolog.Logger, db *gorm.DB, german, english Plan) error {
 	return db.Transaction(func(tx *gorm.DB) error {

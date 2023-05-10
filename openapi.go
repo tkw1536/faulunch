@@ -19,6 +19,9 @@ func (server *Server) handleAPI() http.Handler {
 
 	// build the router api v1
 	v1router := httprouter.New()
+	v1router.Handle(http.MethodGet, "/api/v1/sync", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		server.handleAPISync(w, r)
+	})
 	v1router.Handle(http.MethodGet, "/api/v1/locations", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		server.handleAPILocations(w, r)
 	})
@@ -46,6 +49,24 @@ const (
 	internalServerError = `{"status":"Internal Server Error"}`
 	notFoundError       = `{"status":"Not Found"}`
 )
+
+func (server *Server) handleAPISync(w http.ResponseWriter, r *http.Request) {
+	logger := server.Logger.With().Str("route", "API.Sync").Logger()
+
+	// fetch all the items
+	sync, err := server.API.LastSync()
+	logger.Trace().Err(err).Msg("API.Sync")
+
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(internalServerError))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(sync)
+}
 
 func (server *Server) handleAPILocations(w http.ResponseWriter, r *http.Request) {
 	logger := server.Logger.With().Str("route", "API.Locations").Logger()

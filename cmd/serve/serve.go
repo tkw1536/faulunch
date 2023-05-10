@@ -43,7 +43,7 @@ func main() {
 
 	// do the migration
 	{
-		err := db.AutoMigrate(&faulunch.MenuItem{})
+		err := db.AutoMigrate(&faulunch.MenuItem{}, &faulunch.SyncEvent{})
 		log.Err(err).Msg("migrating database")
 		if err != nil {
 			panic(err)

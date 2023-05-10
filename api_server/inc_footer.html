@@ -1,11 +1,17 @@
 <footer>
     <p>
         {{ if .English }}
-            Powered By FauLunch. <a href="/api/">API</a>. <a target="_blank" rel="noopener noreferrer" href="https://github.com/tkw1536/faulunch">Source Code</a>.
+            Powered By FauLunch. 
+            Last Database Update (UTC): <time datetime="{{ .LastSync.Format "2006-01-02T15:04:05Z07:00" }}">{{ .LastSync.Format "2006-01-02T15:04:05Z07:00" }}</time>.
+            <a href="/api/">API</a>. <a target="_blank" rel="noopener noreferrer" href="https://github.com/tkw1536/faulunch">Source Code</a>.
+            
         {{ else }}
-            Powered By FauLunch. <a href="/api/">API</a>. <a target="_blank" rel="noopener noreferrer" href="https://github.com/tkw1536/faulunch">Quelltext</a>.
+            Powered By FauLunch. 
+            Letztes Datenbank Update (UTC): <time datetime="{{ .LastSync.Format "2006-01-02T15:04:05Z07:00" }}">{{ .LastSync.Format "2006-01-02T15:04:05Z07:00" }}</time>.
+            <a href="/api/">API</a>. <a target="_blank" rel="noopener noreferrer" href="https://github.com/tkw1536/faulunch">Quelltext</a>.   
         {{ end }}
     </p>
+        
 
     {{ .LegalHTML }}
 </footer>

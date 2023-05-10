@@ -18,9 +18,44 @@
       {
          "name": "menu",
          "description": "Access menus"
+      },
+      {
+         "name": "sync",
+         "description": "Access meta information about synchronization"
       }
    ],
    "paths": {
+      "/sync": {
+         "get": {
+            "tags": [
+               "sync"
+            ],
+            "summary": "Fetches the last synchronization event",
+            "description": "Returns the last time menus were synced from the upstream server. ",
+            "responses": {
+               "200": {
+                  "description": "Last sync fetched successfully",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/SyncEvent"
+                        }
+                     }
+                  }
+               },
+               "500": {
+                  "description": "Unable to get last sync",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/InternalServerError"
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      },
       "/locations": {
          "get": {
             "tags": [
@@ -367,6 +402,26 @@
                   "format": "float",
                   "description": "amount of salt in grams",
                   "example": 1.2
+               }
+            }
+         },
+         "SyncEvent": {
+            "type": "object",
+            "description": "An event representing a synchronization with the upstream server",
+            "required": [
+               "start",
+               "stop"
+            ],
+            "properties": {
+               "start": {
+                  "type": "number",
+                  "description": "Unix timestamp (seconds since epoch) when the synchronization was started",
+                  "example": 1683704244
+               },
+               "stop": {
+                  "type": "number",
+                  "description": "Unix timestamp (seconds since epoch) when the synchronization was stopped",
+                  "example": 1683704246
                }
             }
          },

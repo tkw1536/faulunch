@@ -121,7 +121,18 @@ type globalContext struct {
 	requestURI string // uri being requested
 	English    bool
 
-	legal ServerLegal
+	legal    ServerLegal
+	LastSync time.Time
+}
+
+func (gc *globalContext) loadLastSync(api *API) error {
+	lastSync, err := api.LastSync()
+	if err != nil {
+		return err
+
+	}
+	gc.LastSync = time.Unix(lastSync.Stop, 0).UTC()
+	return nil
 }
 
 func (gc globalContext) Annotate(value string) template.HTML {
@@ -176,15 +187,20 @@ func (server *Server) HandleIndex(english bool, w http.ResponseWriter, r *http.R
 
 	// and execute the template
 	{
-		w.Header().Add("Content-Type", "text/html")
-		err := apiServerTemplate.ExecuteTemplate(w, "index.html", indexContext{
+		context := indexContext{
 			globalContext: globalContext{
 				English:    english,
 				requestURI: r.URL.RequestURI(),
 				legal:      server.Legal,
 			},
 			Locations: results,
-		})
+		}
+		if err := context.loadLastSync(server.API); err != nil {
+			logger.Debug().Err(err).Msg("LoadLastSync")
+		}
+
+		w.Header().Add("Content-Type", "text/html")
+		err := apiServerTemplate.ExecuteTemplate(w, "index.html", context)
 		logger.Debug().Err(err).Msg("ExecuteTemplate")
 	}
 }
@@ -247,6 +263,10 @@ func (server *Server) HandleMenu(location Location, day Day, english bool, w htt
 		},
 		Location: location,
 		Day:      day,
+	}
+
+	if err := mc.loadLastSync(server.API); err != nil {
+		logger.Debug().Err(err).Msg("LoadLastSync")
 	}
 
 	var err error
