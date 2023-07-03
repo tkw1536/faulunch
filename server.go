@@ -34,9 +34,18 @@ type ServerLegal struct {
 }
 
 func (legal ServerLegal) DEHTML() template.HTML {
+	if legal.Link == "" || legal.DEString == "" {
+		return ""
+	}
 	return template.HTML("<a href='" + legal.Link + "' target='_blank' rel='noopener noreferer'>" + template.HTMLEscapeString(legal.DEString) + "</a>")
 }
 func (legal ServerLegal) ENHTML() template.HTML {
+	if legal.ENString == "" {
+		legal.ENString = legal.DEString
+	}
+	if legal.Link == "" || legal.ENString == "" {
+		return ""
+	}
 	return template.HTML("<a href='" + legal.Link + "' target='_blank' rel='noopener noreferer'>" + template.HTMLEscapeString(legal.ENString) + "</a>")
 }
 

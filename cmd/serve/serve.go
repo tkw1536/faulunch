@@ -125,9 +125,9 @@ var flagAutoSync time.Duration
 var flagDebug bool = false
 var flagNoMinify bool = false
 var flagAddr string = "127.0.0.1:3000"
-var flagLink string = "https://privacy.kwarc.info/"
-var flagDEText string = "Keine offizielle Seite des Studentenwerks. Alle Angaben, insbesondere zu Speiseplänen und Preisen, sind ohne Gewähr. Siehe auch Impressum und Datenschutz. "
-var flagENText string = "Not an official page of Studentenwerk. All information subject to change. See also Imprint and Privacy Policy. "
+var flagLink string = ""
+var flagDEText string = "Keine offizielle Seite des Studentenwerks. Alle Angaben, insbesondere zu Speiseplänen und Preisen, sind ohne Gewähr. Siehe auch Impressum, Datenschutz und Barrierefreiheitserklärung. "
+var flagENText string = "Not an official page of Studentenwerk. All information subject to change. See also Imprint, Privacy Policy and Accessibility. "
 
 func init() {
 	defer flag.Parse()
