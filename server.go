@@ -252,7 +252,7 @@ const (
 func (server *Server) HandleLocation(location Location, english bool, w http.ResponseWriter, r *http.Request) {
 	logger := server.Logger.With().Str("route", "HandleLocation").Str("location", string(location)).Logger()
 
-	now, err := server.API.CurrentDay(location, ParseDay(time.Now()))
+	now, err := server.API.CurrentDay(location, Today())
 	logger.Debug().Err(err).Msg("API.CurrentDay")
 	if err != nil {
 		http.NotFound(w, r)

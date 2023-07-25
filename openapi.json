@@ -108,6 +108,30 @@
                   },
                   "required": true,
                   "description": "ID of location to list available menu times for."
+               },
+               {
+                  "in": "query",
+                  "name": "from",
+                  "example": 1682028000,
+                  "schema": {
+                     "type": "integer",
+                     "minimum": 0
+                  },
+                  "required": false,
+                  "description": "Unix timestamp (milliseconds since epoch) of first day to check."
+               },
+               {
+                  "in": "query",
+                  "name": "days",
+                  "example": 28,
+                  "default": 28,
+                  "minimum": 1,
+                  "maximum": 365,
+                  "schema": {
+                     "type": "integer"
+                  },
+                  "required": false,
+                  "description": "Maximal number of days to check for a menu"
                }
             ],
             "responses": {
@@ -120,9 +144,19 @@
                            "description": "Available list of dates, newest first.",
                            "items": {
                               "type": "number",
-                              "description": "Unix timestamp representing the start of day in local timezone.",
+                              "description": "Unix timestamp (milliseconds since epoch) of the relevant day",
                               "example": 1682028000
                            }
+                        }
+                     }
+                  }
+               },
+               "500": {
+                  "description": "List failed",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/InternalServerError"
                         }
                      }
                   }
@@ -190,6 +224,16 @@
                      "application/json": {
                         "schema": {
                            "$ref": "#/components/schemas/NotFoundError"
+                        }
+                     }
+                  }
+               },
+               "500": {
+                  "description": "Getting menu failed",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/InternalServerError"
                         }
                      }
                   }

@@ -3,6 +3,7 @@ package faulunch
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/swaggest/swgui/v4emb"
@@ -45,10 +46,25 @@ func (server *Server) handleAPI() http.Handler {
 	return &mux
 }
 
+const notFoundError = `{"status":"Not Found"}`
+
+// handleNotFound sends a not found response to the caller
+func (server *Server) handleNotFound(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte(notFoundError))
+}
+
 const (
 	internalServerError = `{"status":"Internal Server Error"}`
-	notFoundError       = `{"status":"Not Found"}`
 )
+
+// handleInternalServerError sends an internal server error
+func (server *Server) handleInternalServerError(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte(internalServerError))
+}
 
 func (server *Server) handleAPISync(w http.ResponseWriter, r *http.Request) {
 	logger := server.Logger.With().Str("route", "API.Sync").Logger()
@@ -58,9 +74,7 @@ func (server *Server) handleAPISync(w http.ResponseWriter, r *http.Request) {
 	logger.Trace().Err(err).Msg("API.Sync")
 
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(internalServerError))
+		server.handleInternalServerError(w)
 		return
 	}
 
@@ -76,9 +90,7 @@ func (server *Server) handleAPILocations(w http.ResponseWriter, r *http.Request)
 	logger.Trace().Err(err).Msg("API.Locations")
 
 	if err != nil || len(results) == 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(internalServerError))
+		server.handleInternalServerError(w)
 		return
 	}
 
@@ -89,16 +101,49 @@ func (server *Server) handleAPILocations(w http.ResponseWriter, r *http.Request)
 func (server *Server) handleAPIMenuDays(location Location, w http.ResponseWriter, r *http.Request) {
 	logger := server.Logger.With().Str("route", "API.MenuDays").Str("location", string(location)).Logger()
 
-	results, err := server.API.Days(location)
+	// get the day to start with
+	from := ParseDay(r.URL.Query().Get("from"))
+	if from == 0 {
+		from = Today().Add(-21) // default 21 days ago
+	}
+
+	count, err := strconv.Atoi(r.URL.Query().Get("days"))
+	if err != nil {
+		count = 28 // default to 28 days
+	}
+
+	// clamp to the range 1 ... 365
+	if count < 1 {
+		count = 1
+	}
+	if count > 365 {
+		count = 365
+	}
+
+	results, err := server.API.Days(location, from, count)
 	logger.Trace().Err(err).Msg("API.Days")
 
-	if err != nil || len(results) == 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(notFoundError))
+	// something went wrong
+	if err != nil {
+		server.handleInternalServerError(w)
 		return
 	}
 
+	// check if the location exists
+	if len(results) == 0 {
+		exists, err := server.API.KnowsLocation(location)
+		if err != nil {
+			server.handleInternalServerError(w)
+			return
+		}
+
+		if !exists {
+			server.handleNotFound(w)
+			return
+		}
+	}
+
+	// send the response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
 }
@@ -109,10 +154,13 @@ func (server *Server) handleAPIMenu(location Location, day Day, w http.ResponseW
 	results, err := server.API.MenuItems(location, day)
 	logger.Trace().Err(err).Msg("API.MenuItems")
 
-	if err != nil || len(results) == 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(notFoundError))
+	if err != nil {
+		server.handleInternalServerError(w)
+		return
+	}
+
+	if len(results) == 0 {
+		server.handleNotFound(w)
 		return
 	}
 

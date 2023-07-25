@@ -73,6 +73,11 @@ func ParseDay(value any) Day {
 	return Day(di)
 }
 
+// Today returns the current day
+func Today() Day {
+	return normalizeDay(time.Now())
+}
+
 var europeBerlin *time.Location
 
 func init() {
@@ -81,6 +86,23 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func normalizeDay(t time.Time) Day {
+	d := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, europeBerlin)
+	return Day(d.Unix())
+}
+
+// Normalize normalizes the given day, that is sets it to 0:00 of the local timezone.
+func (d Day) Normalize() Day {
+	return normalizeDay(d.Time())
+}
+
+// Add adds count number of days to the current day.
+// The result is normalized.
+func (d Day) Add(count int) Day {
+	t := d.Time().Add(time.Duration(count) * 24 * time.Hour)
+	return normalizeDay(t)
 }
 
 // Time returns the time behind this day in the appropriate local timezone.

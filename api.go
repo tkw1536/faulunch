@@ -161,9 +161,18 @@ func reverse[S ~[]E, E any](s S) {
 	}
 }
 
-// Days returns the list of days for the available location
-func (api *API) Days(location Location) (days []Day, err error) {
-	res := api.DB.Model(&MenuItem{}).Where("Location = ?", location).Order("day DESC").Distinct().Pluck("day", &days)
+// KnowsLocation checks if at least one time for the given location is known
+func (api *API) KnowsLocation(location Location) (exists bool, err error) {
+	err = api.DB.Model(&MenuItem{}).Where("Location = ?", location).Select("count(*) > 0").Find(&exists).Error
+	return
+}
+
+// Days returns the days with an explicit menu starting at day, and including (at most) the next count days.
+func (api *API) Days(location Location, day Day, count int) (days []Day, err error) {
+	start := day.Normalize()
+	end := day.Add(count)
+
+	res := api.DB.Model(&MenuItem{}).Where("Location = ? AND day >= ? AND day < ?", location, start, end).Order("day DESC").Distinct().Pluck("day", &days)
 	err = res.Error
 	return
 }
