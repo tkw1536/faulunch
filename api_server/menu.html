@@ -10,7 +10,7 @@
         FauLunch - {{ $loc.Name }} - {{ if .English }}{{.Day.ENHTML}}{{ else }}{{.Day.DEHTML}}{{ end }}
     </h1>
     <nav>
-        <p>
+        <p id='add-share-button'>
             {{ .Alternate }}
 
             {{ if $english }}

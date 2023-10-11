@@ -18,3 +18,46 @@
         });
     }
 })();
+
+(function () {
+    // ensure the share api is there
+    if (typeof navigator.share !== 'function') {
+        console.warn('navigator.share is not a function');
+        return
+    }
+
+    // find the element to add the share button to
+    const element = document.getElementById('add-share-button');
+    if (!element) {
+        console.warn('no share to add');
+        return
+    }
+
+    // create element
+    const a = document.createElement('a');
+    a.setAttribute('href', 'javascript:void(0);')
+    a.append(document.createTextNode(document.documentElement.lang !== 'de' ? 'Share' : 'Teilen'));
+
+    // add the link
+    element.prepend(document.createTextNode(' '));
+    element.prepend(a);
+
+    a.addEventListener('click', (evt) => {
+        evt.preventDefault();
+
+
+        const description = document.querySelector('meta[name=description]');
+        const metaDescription = (description && description.hasAttribute('content')) ? description.getAttribute('content') : undefined;
+
+        navigator.share({
+            'text': metaDescription,
+            'title': document.title,
+            'url': location.href,
+        })
+    })
+
+
+
+
+
+})()
