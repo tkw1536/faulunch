@@ -1,6 +1,6 @@
 module github.com/tkw1536/faulunch
 
-go 1.21.3
+go 1.21.5
 
 require (
 	github.com/glebarez/sqlite v1.10.0
