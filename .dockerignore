@@ -5,3 +5,4 @@
 !go.sum
 !api_server
 !openapi.json
+!internal
