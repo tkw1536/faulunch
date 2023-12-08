@@ -28,9 +28,9 @@ func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
 	// store all the additive and ingredient data
 	// then sort it for convenience
 
-	item.AdditiveAnnotations.Data = internal.SortedKeysOf(additives, func(a, b Additive) int { return a.Cmp(b) })
-	item.AllergenAnnotations.Data = internal.SortedKeysOf(allergens, func(a, b Allergen) int { return a.Cmp(b) })
-	item.IngredientAnnotations.Data = internal.SortedKeysOf(ingredents, func(a, b Ingredient) int { return a.Cmp(b) })
+	internal.SetJSONData(&item.AdditiveAnnotations, internal.SortedKeysOf(additives, func(a, b Additive) int { return a.Cmp(b) }))
+	internal.SetJSONData(&item.AllergenAnnotations, internal.SortedKeysOf(allergens, func(a, b Allergen) int { return a.Cmp(b) }))
+	internal.SetJSONData(&item.IngredientAnnotations, internal.SortedKeysOf(ingredents, func(a, b Ingredient) int { return a.Cmp(b) }))
 }
 
 // RenderAnnotations renders annotations in the provided text

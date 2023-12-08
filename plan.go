@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog"
+	"github.com/tkw1536/faulunch/internal"
 )
 
 type Plan struct {
@@ -85,7 +86,7 @@ func Merge(logger *zerolog.Logger, german Plan, english Plan) (location Location
 				menu.Preis3 = LPrice(item.Preis3)
 
 				// TODO: Extract Piktogramme
-				menu.Piktogramme.Data = menu.parseIngredients(item.Piktogramme, logger)
+				internal.SetJSONData(&menu.Piktogramme, menu.parseIngredients(item.Piktogramme, logger))
 				menu.Kj = LFloat(item.Kj)
 				menu.Kcal = LFloat(item.Kcal)
 				menu.Fett = LFloat(item.Fett)

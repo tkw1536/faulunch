@@ -101,7 +101,7 @@ func isOnlyDigits(value string) bool {
 }
 
 func (m MenuItem) Ingredients() []Ingredient {
-	return m.Piktogramme.Data
+	return m.Piktogramme.Data()
 }
 
 func (m MenuItem) catScore() int {

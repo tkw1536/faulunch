@@ -298,13 +298,13 @@ func (server *Server) HandleMenu(location Location, day Day, english bool, w htt
 	ingredientsSet := make(map[Ingredient]struct{})
 
 	for _, i := range mc.Items {
-		for _, add := range i.AdditiveAnnotations.Data {
+		for _, add := range i.AdditiveAnnotations.Data() {
 			additivesSet[add] = struct{}{}
 		}
-		for _, allergen := range i.AllergenAnnotations.Data {
+		for _, allergen := range i.AllergenAnnotations.Data() {
 			allergensSet[allergen] = struct{}{}
 		}
-		for _, ing := range i.IngredientAnnotations.Data {
+		for _, ing := range i.IngredientAnnotations.Data() {
 			ingredientsSet[ing] = struct{}{}
 		}
 	}
