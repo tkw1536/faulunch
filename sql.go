@@ -57,15 +57,27 @@ type MenuItem struct {
 }
 
 var categoryTranslations = map[string]string{
-	"Essen":        "Meal",
-	"Aktionsessen": "Special Meal",
-	"Aktion":       "Special",
-	"Suppe":        "Soup",
-	"SB-Theke":     "Self-Service Counter",
+	"Essen":          "Meal",
+	"Aktionsessen":   "Special Meal",
+	"Aktion":         "Special",
+	"Suppe":          "Soup",
+	"Suppen":         "Soups",
+	"SB-Theke":       "Self-Service Counter",
+	"Tagesangebot":   "Daily Special",
+	"Tipp des Tages": "Tip Of The Day",
 }
 
-// UpdateComputedFields updates the computed fields
 func (m *MenuItem) UpdateComputedFields(logger *zerolog.Logger) {
+	m.translateCategoryNames(logger)
+	m.extractAnnotations(logger)
+}
+
+func (m *MenuItem) translateCategoryNames(logger *zerolog.Logger) {
+	if complete, ok := categoryTranslations[m.Category]; ok {
+		m.CategoryEN = complete
+		return
+	}
+
 	fields := strings.Fields(m.Category)
 	for i, field := range fields {
 		trans, ok := categoryTranslations[field]
@@ -77,9 +89,6 @@ func (m *MenuItem) UpdateComputedFields(logger *zerolog.Logger) {
 	}
 
 	m.CategoryEN = strings.Join(fields, " ")
-
-	// update the annotations
-	m.extractAnnotations(logger)
 }
 
 func isOnlyDigits(value string) bool {
