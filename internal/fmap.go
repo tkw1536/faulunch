@@ -1,8 +1,6 @@
-package faulunch
+package internal
 
-import (
-	"strings"
-)
+import "strings"
 
 // FMap represents a map that identifies keys via unicode case-folding.
 // The original key case is maintained.

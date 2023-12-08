@@ -5,10 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"slices"
-
 	"github.com/rs/zerolog"
-	"golang.org/x/exp/maps"
+	"github.com/tkw1536/faulunch/internal"
 )
 
 var annotationPattern = regexp.MustCompile(`\([^)\s]+\)`)
@@ -30,13 +28,9 @@ func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
 	// store all the additive and ingredient data
 	// then sort it for convenience
 
-	item.AdditiveAnnotations.Data = maps.Keys(additives)
-	item.AllergenAnnotations.Data = maps.Keys(allergens)
-	item.IngredientAnnotations.Data = maps.Keys(ingredents)
-
-	slices.SortFunc(item.AdditiveAnnotations.Data, func(a, b Additive) int { return a.Cmp(b) })
-	slices.SortFunc(item.AllergenAnnotations.Data, func(a, b Allergen) int { return a.Cmp(b) })
-	slices.SortFunc(item.IngredientAnnotations.Data, func(a, b Ingredient) int { return a.Cmp(b) })
+	item.AdditiveAnnotations.Data = internal.SortedKeysOf(additives, func(a, b Additive) int { return a.Cmp(b) })
+	item.AllergenAnnotations.Data = internal.SortedKeysOf(allergens, func(a, b Allergen) int { return a.Cmp(b) })
+	item.IngredientAnnotations.Data = internal.SortedKeysOf(ingredents, func(a, b Ingredient) int { return a.Cmp(b) })
 }
 
 // RenderAnnotations renders annotations in the provided text
@@ -398,8 +392,7 @@ func (menu *MenuItem) parseIngredients(s string, logger *zerolog.Logger) []Ingre
 		ingredients[ing] = struct{}{}
 	}
 
-	ings := maps.Keys(ingredients)
-	slices.SortFunc(ings, func(a, b Ingredient) int { return a.Cmp(b) })
+	ings := internal.SortedKeysOf(ingredients, func(a, b Ingredient) int { return a.Cmp(b) })
 	return ings
 }
 
@@ -495,8 +488,8 @@ func (i Ingredient) DEDef() template.HTML {
 	return template.HTML("<a class='annot' href='#ing-" + string(i) + "' title='" + i.DEString() + "'>" + i.DEString() + "</a>")
 }
 
-func order[T ~string](values ...T) FMap[T, int] {
-	m := make(FMap[T, int], len(values))
+func order[T ~string](values ...T) internal.FMap[T, int] {
+	m := make(internal.FMap[T, int], len(values))
 	for index, item := range values {
 		m.Add(item, index)
 	}

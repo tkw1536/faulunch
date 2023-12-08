@@ -5,14 +5,13 @@ import (
 	"html/template"
 	"net/http"
 	"regexp"
-	"slices"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/zerolog"
-	"golang.org/x/exp/maps"
+	"github.com/tkw1536/faulunch/internal"
 	"golang.org/x/text/language"
 )
 
@@ -310,14 +309,9 @@ func (server *Server) HandleMenu(location Location, day Day, english bool, w htt
 		}
 	}
 
-	mc.Additives = maps.Keys(additivesSet)
-	slices.SortFunc(mc.Additives, func(a, b Additive) int { return a.Cmp(b) })
-
-	mc.Allergens = maps.Keys(allergensSet)
-	slices.SortFunc(mc.Allergens, func(a, b Allergen) int { return a.Cmp(b) })
-
-	mc.Ingredients = maps.Keys(ingredientsSet)
-	slices.SortFunc(mc.Additives, func(a, b Additive) int { return a.Cmp(b) })
+	mc.Additives = internal.SortedKeysOf(additivesSet, func(a, b Additive) int { return a.Cmp(b) })
+	mc.Allergens = internal.SortedKeysOf(allergensSet, func(a, b Allergen) int { return a.Cmp(b) })
+	mc.Ingredients = internal.SortedKeysOf(ingredientsSet, func(a, b Ingredient) int { return a.Cmp(b) })
 
 	// and execute the template
 	{

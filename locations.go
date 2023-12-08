@@ -6,8 +6,7 @@ import (
 	"html/template"
 	"net/url"
 
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
+	"github.com/tkw1536/faulunch/internal"
 )
 
 type Location string
@@ -46,9 +45,8 @@ const (
 )
 
 func Locations() []Location {
-	keys := maps.Keys(locationIDs)
-	slices.SortFunc(keys, func(a, b Location) bool {
-		return locationIDs[a] < locationIDs[b]
+	keys := internal.SortedKeysOf(locationIDs, func(a, b Location) int {
+		return locationIDs[a] - locationIDs[b]
 	})
 	return keys
 }
