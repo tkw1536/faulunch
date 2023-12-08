@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/swaggest/swgui/v4emb"
+	"github.com/swaggest/swgui/v5emb"
 
 	_ "embed"
 )
@@ -16,7 +16,7 @@ var openAPIJSON []byte
 
 func (server *Server) handleAPI() http.Handler {
 	// build the swagger api
-	swagger := v4emb.NewHandler("FauLunch API", "/api/openapi.json", "/api/")
+	swagger := v5emb.NewHandler("FauLunch API", "/api/openapi.json", "/api/")
 
 	// build the router api v1
 	v1router := httprouter.New()
