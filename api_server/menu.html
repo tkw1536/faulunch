@@ -55,16 +55,16 @@
 
     {{ if $english }}
     {{ if .TitleEN }}
-    <p>{{ $annotate.Annotate .TitleEN }}</p>
+    <p>{{ .HTMLTitleEN }}</p>
     {{ else }}
     <p lang="de">
-        {{ $annotate.Annotate .TitleDE }}
+        {{ .HTMLTitleDE }}
         <span role="note" lang="en">Unfortunately this description is only available in German.</span>
     </p>
     {{ end }}
     {{ else }}
     {{ if .TitleDE }}
-    <p>{{ $annotate.Annotate .TitleDE }}</p>
+    <p>{{ .HTMLTitleDE }}</p>
     {{ end }}
     {{ end }}
 
@@ -79,24 +79,24 @@
     {{ if $english }}
     {{ if .DescriptionEN }}
     <p>
-        {{ $annotate.Annotate .DescriptionEN }}
+        {{ .HTMLDescriptionEN }}
         {{ $needBrokenEnglishNote = true }}
         <span role="note"><a href="#broken-english-note" title="Explanation why description is sometimes only available in German">Unfortunately this description is sometimes only available in German. </a></span>
     </p>
     {{ end }}
     {{ if .BeilagenEN }}
     <p>
-        {{ $annotate.Annotate .BeilagenEN }}
+        {{ .HTMLBeilagenEN }}
         {{ $needBrokenEnglishNote = true }}
         <span role="note"><a href="#broken-english-note" title="Explanation why description is sometimes only available in German" role="note">Unfortunately this description is sometimes only available in German. </a></span>
     </p>
     {{ end }}
     {{ else }}
     {{ if .DescriptionDE }}
-    <p>{{ $annotate.Annotate .DescriptionDE }}</p>
+    <p>{{ .HTMLDescriptionDE }}</p>
     {{ end }}
     {{ if .BeilagenDE }}
-    <p>{{ $annotate.Annotate .BeilagenDE }}</p>
+    <p>{{ .HTMLBeilagenDE }}</p>
     {{ end }}
     {{ end }}
     <div>

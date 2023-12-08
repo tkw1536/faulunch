@@ -3,7 +3,8 @@ package faulunch
 import (
 	"errors"
 
-	"golang.org/x/exp/slices"
+	"slices"
+
 	"gorm.io/gorm"
 )
 
@@ -17,8 +18,8 @@ func (api *API) Locations() (locations []Location, err error) {
 	res := api.DB.Model(&MenuItem{}).Distinct("Location").Pluck("location", &locations)
 	err = res.Error
 
-	slices.SortStableFunc(locations, func(a, b Location) bool {
-		return a.Description().Less(b.Description())
+	slices.SortStableFunc(locations, func(a, b Location) int {
+		return a.Description().Cmp(b.Description())
 	})
 
 	return
@@ -182,7 +183,7 @@ func (api *API) Days(location Location, day Day, count int) (days []Day, err err
 // If it does not exist, an empty menu item is returned.
 func (api *API) MenuItems(location Location, day Day) (items []MenuItem, err error) {
 	res := api.DB.Model(&MenuItem{}).Where("Location = ? AND day = ?", location, day).Order("Category ASC").Find(&items)
-	slices.SortStableFunc(items, func(a, b MenuItem) bool { return a.Less(b) })
+	slices.SortStableFunc(items, func(a, b MenuItem) int { return a.Cmp(b) })
 	err = res.Error
 	return
 }

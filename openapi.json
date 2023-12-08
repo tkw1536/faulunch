@@ -309,27 +309,36 @@
          "MenuItem": {
             "type": "object",
             "required": [
-               "Category",
-               "CategoryEN",
-               "TitleDE",
-               "TitleEN",
-               "DescriptionDE",
-               "DescriptionEN",
+               "AdditiveAnnotations",
+               "AllergenAnnotations",
+               "Ballaststoffe",
                "BeilagenDE",
                "BeilagenEN",
+               "Category",
+               "CategoryEN",
+               "DescriptionDE",
+               "DescriptionEN",
+               "Eiweiss",
+               "Fett",
+               "Gesfett",
+               "HTMLBeilagenDE",
+               "HTMLBeilagenEN",
+               "HTMLDescriptionDE",
+               "HTMLDescriptionEN",
+               "HTMLTitleDE",
+               "HTMLTitleEN",
+               "IngredientAnnotations",
+               "Kcal",
+               "Kh",
+               "Kj",
+               "Piktogramme",
                "Preis1",
                "Preis2",
                "Preis3",
-               "Piktogramme",
-               "Kj",
-               "Kcal",
-               "Fett",
-               "Gesfett",
-               "Kh",
-               "Zucker",
-               "Ballaststoffe",
-               "Eiweiss",
-               "Salz"
+               "Salz",
+               "TitleDE",
+               "TitleEN",
+               "Zucker"
             ],
             "properties": {
                "Category": {
@@ -446,6 +455,51 @@
                   "format": "float",
                   "description": "amount of salt in grams",
                   "example": 1.2
+               },
+               "HTMLTitleDE": {
+                  "type": "string",
+                  "description": "html version of the TitleDE field with annotation references surrounded by spans and inline links to appropriate annotation tables"
+               },
+               "HTMLTitleEN": {
+                  "type": "string",
+                  "description": "html version of the TitleEN field with annotation references surrounded by spans and inline links to appropriate annotation tables"
+               },
+               "HTMLDescriptionDE": {
+                  "type": "string",
+                  "description": "html version of the DescriptionDE field with annotation references surrounded by spans and inline links to appropriate annotation tables. "
+               },
+               "HTMLDescriptionEN": {
+                  "type": "string",
+                  "description": "html version of the DescriptionEN field with annotation references surrounded by spans and inline links to appropriate annotation tables. "
+               },
+               "HTMLBeilagenDE": {
+                  "type": "string",
+                  "description": "html version of the BeilagenDE field with annotation references replaced with <span class='annot'> and inline links to appropriate annotation tables. "
+               },
+               "HTMLBeilagenEN": {
+                  "type": "string",
+                  "description": "html version of the BeilagenEN field with annotation references replaced with <span class='annot'> and inline links to appropriate annotation tables. "
+               },
+               "AllergenAnnotations": {
+                  "type": "array",
+                  "items": {
+                     "$ref": "#/components/schemas/Allergen"
+                  },
+                  "description": "Allergens found in item description."
+               },
+               "AdditiveAnnotations": {
+                  "type": "array",
+                  "items": {
+                     "$ref": "#/components/schemas/Additive"
+                  },
+                  "description": "Additives found in item description."
+               },
+               "IngredientAnnotations": {
+                  "type": "array",
+                  "items": {
+                     "$ref": "#/components/schemas/Ingredient"
+                  },
+                  "description": "Ingredients found in description."
                }
             }
          },

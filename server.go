@@ -5,12 +5,14 @@ import (
 	"html/template"
 	"net/http"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/zerolog"
+	"golang.org/x/exp/maps"
 	"golang.org/x/text/language"
 )
 
@@ -142,10 +144,6 @@ func (gc *globalContext) loadLastSync(api *API) error {
 	}
 	gc.LastSync = time.Unix(lastSync.Stop, 0).UTC()
 	return nil
-}
-
-func (gc globalContext) Annotate(value string) template.HTML {
-	return RenderAnnotations(value, gc.English)
 }
 
 func (gc globalContext) LegalHTML() template.HTML {
@@ -295,7 +293,31 @@ func (server *Server) HandleMenu(location Location, day Day, english bool, w htt
 		return
 	}
 
-	mc.Additives, mc.Allergens, mc.Ingredients = MenuAnnotations(mc.Items, &logger)
+	// merge all the annotations
+	additivesSet := make(map[Additive]struct{})
+	allergensSet := make(map[Allergen]struct{})
+	ingredientsSet := make(map[Ingredient]struct{})
+
+	for _, i := range mc.Items {
+		for _, add := range i.AdditiveAnnotations.Data {
+			additivesSet[add] = struct{}{}
+		}
+		for _, allergen := range i.AllergenAnnotations.Data {
+			allergensSet[allergen] = struct{}{}
+		}
+		for _, ing := range i.IngredientAnnotations.Data {
+			ingredientsSet[ing] = struct{}{}
+		}
+	}
+
+	mc.Additives = maps.Keys(additivesSet)
+	slices.SortFunc(mc.Additives, func(a, b Additive) int { return a.Cmp(b) })
+
+	mc.Allergens = maps.Keys(allergensSet)
+	slices.SortFunc(mc.Allergens, func(a, b Allergen) int { return a.Cmp(b) })
+
+	mc.Ingredients = maps.Keys(ingredientsSet)
+	slices.SortFunc(mc.Additives, func(a, b Additive) int { return a.Cmp(b) })
 
 	// and execute the template
 	{

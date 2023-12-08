@@ -5,9 +5,10 @@ import (
 	"regexp"
 	"strings"
 
+	"slices"
+
 	"github.com/rs/zerolog"
 	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 )
 
 var annotationPattern = regexp.MustCompile(`\([^)\s]+\)`)
@@ -115,23 +116,26 @@ func renderAnnot(annot string, english bool) template.HTML {
 	return template.HTML(template.HTMLEscapeString(annot))
 }
 
-// MenuAnnotations returns the annotations for the given menu items
-func MenuAnnotations(items []MenuItem, logger *zerolog.Logger) ([]Additive, []Allergen, []Ingredient) {
+func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
 	annots := make(map[string]struct{})
-	for _, item := range items {
-		extractAnnots(item.TitleDE, annots)
-		extractAnnots(item.TitleEN, annots)
-		extractAnnots(item.DescriptionDE, annots)
-		extractAnnots(item.DescriptionEN, annots)
-		extractAnnots(item.BeilagenDE, annots)
-		extractAnnots(item.BeilagenEN, annots)
 
-		for _, ing := range item.Ingredients() {
-			annots[string(ing)] = struct{}{}
-		}
-	}
+	extractAnnots(item.TitleDE, annots)
+	extractAnnots(item.TitleEN, annots)
+	extractAnnots(item.DescriptionDE, annots)
+	extractAnnots(item.DescriptionEN, annots)
+	extractAnnots(item.BeilagenDE, annots)
+	extractAnnots(item.BeilagenEN, annots)
 
-	return annotations(annots, logger)
+	item.HTMLTitleDE = RenderAnnotations(item.TitleDE, false)
+	item.HTMLTitleEN = RenderAnnotations(item.TitleEN, true)
+
+	item.HTMLDescriptionDE = RenderAnnotations(item.DescriptionDE, false)
+	item.HTMLDescriptionEN = RenderAnnotations(item.DescriptionEN, true)
+
+	item.HTMLBeilagenDE = RenderAnnotations(item.BeilagenDE, false)
+	item.HTMLBeilagenEN = RenderAnnotations(item.BeilagenEN, true)
+
+	item.AdditiveAnnotations.Data, item.AllergenAnnotations.Data, item.IngredientAnnotations.Data = annotations(annots, logger)
 }
 
 func extractAnnots(source string, annots map[string]struct{}) {
@@ -148,6 +152,10 @@ func extractAnnots(source string, annots map[string]struct{}) {
 }
 
 func annotations(annots map[string]struct{}, logger *zerolog.Logger) (adds []Additive, alls []Allergen, ings []Ingredient) {
+	adds = make([]Additive, 0, len(annots))
+	alls = make([]Allergen, 0, len(annots))
+	ings = make([]Ingredient, 0, len(annots))
+
 	// check if we have an additive or an allergen
 	for annot := range annots {
 		add := Additive(annot)
@@ -172,9 +180,9 @@ func annotations(annots map[string]struct{}, logger *zerolog.Logger) (adds []Add
 	}
 
 	// sort the results
-	slices.SortFunc(adds, func(a, b Additive) bool { return a.Less(b) })
-	slices.SortFunc(alls, func(a, b Allergen) bool { return a.Less(b) })
-	slices.SortFunc(ings, func(a, b Ingredient) bool { return a.Less(b) })
+	slices.SortFunc(adds, func(a, b Additive) int { return a.Cmp(b) })
+	slices.SortFunc(alls, func(a, b Allergen) int { return a.Cmp(b) })
+	slices.SortFunc(ings, func(a, b Ingredient) int { return a.Cmp(b) })
 
 	// and done!
 	return
@@ -201,8 +209,8 @@ var additiveOrder = order(
 	Coating,
 )
 
-func (a Additive) Less(other Additive) bool {
-	return additiveOrder[a] < additiveOrder[other]
+func (a Additive) Cmp(other Additive) int {
+	return additiveOrder[a] - additiveOrder[other]
 }
 
 func (a Additive) Known() bool {
@@ -255,8 +263,8 @@ var additiveDE = map[Additive]string{
 
 type Allergen string
 
-func (a Allergen) Less(other Allergen) bool {
-	return allergenOrder[a] < allergenOrder[other]
+func (a Allergen) Cmp(other Allergen) int {
+	return allergenOrder[a] - allergenOrder[other]
 }
 
 func (a Allergen) Known() bool {
@@ -382,7 +390,7 @@ func ParseIngredients(s string, logger *zerolog.Logger) []Ingredient {
 	}
 
 	ings := maps.Keys(ingredients)
-	slices.SortFunc(ings, func(a, b Ingredient) bool { return a.Less(b) })
+	slices.SortFunc(ings, func(a, b Ingredient) int { return a.Cmp(b) })
 	return ings
 }
 
@@ -445,8 +453,8 @@ var ingredientDE = map[Ingredient]string{
 	CO2Neutral: "CO2 Neutral",
 }
 
-func (i Ingredient) Less(other Ingredient) bool {
-	return ingredientOrder[i] < ingredientOrder[other]
+func (i Ingredient) Cmp(other Ingredient) int {
+	return ingredientOrder[i] - ingredientOrder[other]
 }
 
 func (i Ingredient) Known() bool {

@@ -135,15 +135,15 @@ func (ld LocationDescription) kind() int {
 	return 2
 }
 
-func (ld LocationDescription) Less(other LocationDescription) bool {
+func (ld LocationDescription) Cmp(other LocationDescription) int {
 
 	// kind first
 	{
 		l, o := ld.kind(), other.kind()
 		if l < o {
-			return true
+			return -1
 		} else if l > o {
-			return false
+			return 1
 		}
 	}
 
@@ -151,9 +151,9 @@ func (ld LocationDescription) Less(other LocationDescription) bool {
 	{
 		l, o := ld.City, other.City
 		if l < o {
-			return true
+			return -1
 		} else if l > o {
-			return false
+			return 1
 		}
 	}
 
@@ -161,15 +161,14 @@ func (ld LocationDescription) Less(other LocationDescription) bool {
 	{
 		l, o := ld.Name, other.Name
 		if l < o {
-			return true
+			return -1
 		} else if l > o {
-			return false
+			return 1
 		}
 	}
 
 	// they are equal
-	return true
-
+	return 0
 }
 
 var locationDescriptions = map[Location]LocationDescription{

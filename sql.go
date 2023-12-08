@@ -1,6 +1,7 @@
 package faulunch
 
 import (
+	"html/template"
 	"strconv"
 	"strings"
 
@@ -41,6 +42,18 @@ type MenuItem struct {
 	Ballaststoffe LFloat
 	Eiweiss       LFloat
 	Salz          LFloat
+
+	// Annotations properly replaced with <span class='#type'> and inside <sup>s
+	HTMLTitleDE       template.HTML
+	HTMLTitleEN       template.HTML
+	HTMLDescriptionDE template.HTML
+	HTMLDescriptionEN template.HTML
+	HTMLBeilagenDE    template.HTML
+	HTMLBeilagenEN    template.HTML
+
+	AllergenAnnotations   datatypes.JSONType[[]Allergen]
+	AdditiveAnnotations   datatypes.JSONType[[]Additive]
+	IngredientAnnotations datatypes.JSONType[[]Ingredient]
 }
 
 var categoryTranslations = map[string]string{
@@ -64,6 +77,9 @@ func (m *MenuItem) UpdateComputedFields(logger *zerolog.Logger) {
 	}
 
 	m.CategoryEN = strings.Join(fields, " ")
+
+	// update the annotations
+	m.extractAnnotations(logger)
 }
 
 func isOnlyDigits(value string) bool {
@@ -91,14 +107,14 @@ func (m MenuItem) catScore() int {
 		return 0
 	}
 }
-func (m MenuItem) Less(other MenuItem) bool {
+func (m MenuItem) Cmp(other MenuItem) int {
 	ours, theirs := m.catScore(), other.catScore()
 	if ours < theirs {
-		return true
+		return -1
 	} else if ours > theirs {
-		return false
+		return 1
 	}
-	return m.Category < other.Category
+	return strings.Compare(m.Category, other.Category)
 }
 
 type LPrice float64
