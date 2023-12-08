@@ -525,7 +525,7 @@
          },
          "Ingredient": {
             "type": "string",
-            "description": "An ingredient of the item. The abbreviations mean:\n\n * `S` - Pork\n * `R` - Beef\n * `G` - Poultry\n * `L` - Lamb\n * `W` - Game\n * `F` - Fish\n * `V` - Vegetarian\n * `veg` - Vegan\n * `Bio` - organic (certified by DE-ÖKO-006)\n * `MSC` - sustainable fish (certified by MSC - C - 51840)\n * `O` - with alcohol\n * `Gf` - Gluten Free\n * `MV` - Mensa Vital\n * `CO2` - CO2 Neutral\n",
+            "description": "An ingredient of the item. The abbreviations mean:\n\n * `S` - Pork\n * `R` - Beef\n * `G` - Poultry\n * `L` - Lamb\n * `W` - Game\n * `F` - Fish\n * `V` - Vegetarian\n * `veg` - Vegan\n * `Bio` - organic (certified by DE-ÖKO-006)\n * `MSC` - sustainable fish (certified by MSC - C - 51840)\n * `A` - with alcohol\n * `Gf` - Gluten Free\n * `MV` - Mensa Vital\n * `CO2` - CO2 Neutral\n",
             "enum": [
                "S",
                "R",
@@ -537,7 +537,7 @@
                "veg",
                "Bio",
                "MSC",
-               "O",
+               "A",
                "Gf",
                "MV",
                "CO2"

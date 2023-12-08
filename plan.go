@@ -85,7 +85,7 @@ func Merge(logger *zerolog.Logger, german Plan, english Plan) (location Location
 				menu.Preis3 = LPrice(item.Preis3)
 
 				// TODO: Extract Piktogramme
-				menu.Piktogramme.Data = ParseIngredients(item.Piktogramme, logger)
+				menu.Piktogramme.Data = menu.parseIngredients(item.Piktogramme, logger)
 				menu.Kj = LFloat(item.Kj)
 				menu.Kcal = LFloat(item.Kcal)
 				menu.Fett = LFloat(item.Fett)

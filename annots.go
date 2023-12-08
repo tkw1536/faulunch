@@ -13,8 +13,34 @@ import (
 
 var annotationPattern = regexp.MustCompile(`\([^)\s]+\)`)
 
+func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
+	additives := make(map[Additive]struct{})
+	allergens := make(map[Allergen]struct{})
+	ingredents := make(map[Ingredient]struct{})
+
+	item.HTMLTitleDE = item.renderAnnotations(logger, item.TitleDE, false, additives, allergens, ingredents)
+	item.HTMLTitleEN = item.renderAnnotations(logger, item.TitleEN, true, additives, allergens, ingredents)
+
+	item.HTMLDescriptionDE = item.renderAnnotations(logger, item.DescriptionDE, false, additives, allergens, ingredents)
+	item.HTMLDescriptionEN = item.renderAnnotations(logger, item.DescriptionEN, true, additives, allergens, ingredents)
+
+	item.HTMLBeilagenDE = item.renderAnnotations(logger, item.BeilagenDE, false, additives, allergens, ingredents)
+	item.HTMLBeilagenEN = item.renderAnnotations(logger, item.BeilagenEN, true, additives, allergens, ingredents)
+
+	// store all the additive and ingredient data
+	// then sort it for convenience
+
+	item.AdditiveAnnotations.Data = maps.Keys(additives)
+	item.AllergenAnnotations.Data = maps.Keys(allergens)
+	item.IngredientAnnotations.Data = maps.Keys(ingredents)
+
+	slices.SortFunc(item.AdditiveAnnotations.Data, func(a, b Additive) int { return a.Cmp(b) })
+	slices.SortFunc(item.AllergenAnnotations.Data, func(a, b Allergen) int { return a.Cmp(b) })
+	slices.SortFunc(item.IngredientAnnotations.Data, func(a, b Ingredient) int { return a.Cmp(b) })
+}
+
 // RenderAnnotations renders annotations in the provided text
-func RenderAnnotations(text string, english bool) template.HTML {
+func (menu *MenuItem) renderAnnotations(logger *zerolog.Logger, text string, english bool, additives map[Additive]struct{}, allergens map[Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
 	values := annotationPattern.Split(text, -1)
 	for i, v := range values {
 		values[i] = template.HTMLEscapeString(v)
@@ -38,7 +64,8 @@ func RenderAnnotations(text string, english bool) template.HTML {
 
 		// find all the individual annotations
 		// and check if there is at least one valid one
-		annots := strings.Split(matches[i], ",")
+		annots := strings.FieldsFunc(matches[i], func(r rune) bool { return r == ',' || r == '.' })
+		annots = fixAnnotTypos(annots)
 		if !anyValidAnnot(annots...) {
 			// no valid annotation => skip
 			builder.WriteRune('(')
@@ -52,8 +79,8 @@ func RenderAnnotations(text string, english bool) template.HTML {
 		builder.WriteString("<span class='annot'>")
 
 		buffer = buffer[:0]
-		for _, annot := range strings.Split(matches[i], ",") {
-			buffer = append(buffer, string(renderAnnot(annot, english)))
+		for _, annot := range annots {
+			buffer = append(buffer, string(menu.renderAnnot(logger, annot, english, additives, allergens, ingredients)))
 		}
 
 		builder.WriteString(strings.Join(buffer, ", "))
@@ -63,25 +90,64 @@ func RenderAnnotations(text string, english bool) template.HTML {
 	return template.HTML(builder.String())
 }
 
+// fixes typos in the annotations
+func fixAnnotTypos(annots []string) []string {
+	fix := make([]string, 0, len(annots))
+	for _, a := range annots {
+		switch a {
+		case "Vegan":
+			fix = append(fix, "veg")
+		case "EiEi", "Egg":
+			fix = append(fix, "Ei")
+		case "Mi7":
+			fix = append(fix, "Mi", "7")
+		case "11":
+			fix = append(fix, "1")
+		case "Sul": // Not sure about this one
+			fix = append(fix, "Su")
+		case "VWz":
+			fix = append(fix, "V", "Wz")
+		case "SelGe":
+			fix = append(fix, "Sel", "Ge")
+		case "SuGe":
+			fix = append(fix, "Su", "Ge")
+		case "Wzel":
+			fix = append(fix, "Wz")
+		case "Sun":
+			fix = append(fix, "So")
+		case "Ma":
+			fix = append(fix, "Man") // TODO: not sure about this one (maybe even a new ingredient)?
+		case "Wed":
+			fix = append(fix, "Mi")
+		case "Se":
+			fix = append(fix, "Wa")
+		case "3":
+			// TODO: Don't know what this stands for.
+			// It occurred in only a few menus.
+		case "cond": // ignore this (appears only in one translation)
+		default:
+			fix = append(fix, a)
+		}
+	}
+	return fix
+}
+
 // validMatches checks if at least one annotation inside the match is valid
 func anyValidAnnot(matches ...string) bool {
 	for _, c := range matches {
-		if validAnnot(c) {
+		if Additive(c).Known() || Allergen(c).Known() || Ingredient(c).Known() {
 			return true
 		}
 	}
 	return false
 }
 
-// validAnnot checks if annot is valid
-func validAnnot(annot string) bool {
-	return Additive(annot).Known() || Allergen(annot).Known() || Ingredient(annot).Known()
-}
-
-func renderAnnot(annot string, english bool) template.HTML {
+// renders and extracts a single annotation
+func (menu *MenuItem) renderAnnot(logger *zerolog.Logger, annot string, english bool, additives map[Additive]struct{}, allergens map[Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
 	{
 		add := Additive(annot)
-		if add.Known() {
+		if add, ok := add.Normalize(); ok {
+			additives[add] = struct{}{}
 			if english {
 				return add.ENHTML()
 			} else {
@@ -93,7 +159,8 @@ func renderAnnot(annot string, english bool) template.HTML {
 	{
 
 		all := Allergen(annot)
-		if all.Known() {
+		if all, ok := all.Normalize(); ok {
+			allergens[all] = struct{}{}
 			if english {
 				return all.ENHTML()
 			} else {
@@ -104,7 +171,8 @@ func renderAnnot(annot string, english bool) template.HTML {
 
 	{
 		ing := Ingredient(annot)
-		if ing.Known() {
+		if ing, ok := ing.Normalize(); ok {
+			ingredients[ing] = struct{}{}
 			if english {
 				return ing.ENHTML()
 			} else {
@@ -113,79 +181,9 @@ func renderAnnot(annot string, english bool) template.HTML {
 		}
 	}
 
+	logger.Error().Str("annot", annot).Int("day", int(menu.Day)).Str("location", string(menu.Location)).Bool("english", english).Msg("Unknown annotation")
+
 	return template.HTML(template.HTMLEscapeString(annot))
-}
-
-func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
-	annots := make(map[string]struct{})
-
-	extractAnnots(item.TitleDE, annots)
-	extractAnnots(item.TitleEN, annots)
-	extractAnnots(item.DescriptionDE, annots)
-	extractAnnots(item.DescriptionEN, annots)
-	extractAnnots(item.BeilagenDE, annots)
-	extractAnnots(item.BeilagenEN, annots)
-
-	item.HTMLTitleDE = RenderAnnotations(item.TitleDE, false)
-	item.HTMLTitleEN = RenderAnnotations(item.TitleEN, true)
-
-	item.HTMLDescriptionDE = RenderAnnotations(item.DescriptionDE, false)
-	item.HTMLDescriptionEN = RenderAnnotations(item.DescriptionEN, true)
-
-	item.HTMLBeilagenDE = RenderAnnotations(item.BeilagenDE, false)
-	item.HTMLBeilagenEN = RenderAnnotations(item.BeilagenEN, true)
-
-	item.AdditiveAnnotations.Data, item.AllergenAnnotations.Data, item.IngredientAnnotations.Data = annotations(annots, logger)
-}
-
-func extractAnnots(source string, annots map[string]struct{}) {
-	for _, value := range annotationPattern.FindAllString(source, -1) {
-		value = value[1 : len(value)-1]
-		values := strings.Split(value, ",")
-		if !anyValidAnnot(values...) {
-			continue
-		}
-		for _, annot := range values {
-			annots[annot] = struct{}{}
-		}
-	}
-}
-
-func annotations(annots map[string]struct{}, logger *zerolog.Logger) (adds []Additive, alls []Allergen, ings []Ingredient) {
-	adds = make([]Additive, 0, len(annots))
-	alls = make([]Allergen, 0, len(annots))
-	ings = make([]Ingredient, 0, len(annots))
-
-	// check if we have an additive or an allergen
-	for annot := range annots {
-		add := Additive(annot)
-		if add.Known() {
-			adds = append(adds, add)
-			continue
-		}
-
-		all := Allergen(annot)
-		if all.Known() {
-			alls = append(alls, all)
-			continue
-		}
-
-		ing := Ingredient(annot)
-		if ing.Known() {
-			ings = append(ings, ing)
-			continue
-		}
-
-		logger.Error().Str("annotation", annot).Msg("Unknown annotation")
-	}
-
-	// sort the results
-	slices.SortFunc(adds, func(a, b Additive) int { return a.Cmp(b) })
-	slices.SortFunc(alls, func(a, b Allergen) int { return a.Cmp(b) })
-	slices.SortFunc(ings, func(a, b Ingredient) int { return a.Cmp(b) })
-
-	// and done!
-	return
 }
 
 type Additive string
@@ -193,6 +191,7 @@ type Additive string
 const (
 	Color           Additive = "1"
 	Caffeine        Additive = "2"
+	UnknownThree    Additive = "3" // TODO: What is this?
 	Preservatives   Additive = "4"
 	Sweeteners      Additive = "5"
 	Antioxidant     Additive = "7"
@@ -205,7 +204,7 @@ const (
 )
 
 var additiveOrder = order(
-	Color, Caffeine, Preservatives, Sweeteners, Antioxidant, FlavorEnhancers, Sulphurated, Blackened, Phosphate, Phenylalanine,
+	Color, Caffeine /*UnknownThree,*/, Preservatives, Sweeteners, Antioxidant, FlavorEnhancers, Sulphurated, Blackened, Phosphate, Phenylalanine,
 	Coating,
 )
 
@@ -214,8 +213,12 @@ func (a Additive) Cmp(other Additive) int {
 }
 
 func (a Additive) Known() bool {
-	_, ok := additiveOrder[a]
-	return ok
+	return additiveOrder.Has(a)
+}
+
+func (a Additive) Normalize() (Additive, bool) {
+	key, _, ok := additiveOrder.Get(a)
+	return key, ok
 }
 
 func (a Additive) ENString() string {
@@ -236,6 +239,7 @@ func (a Additive) DEHTML() template.HTML {
 var additivesEN = map[Additive]string{
 	Color:           "contains colour additives",
 	Caffeine:        "contains caffeine",
+	UnknownThree:    "unknown (3)",
 	Preservatives:   "contains preservatives",
 	Sweeteners:      "contains sweeteners",
 	Antioxidant:     "contains antioxidant",
@@ -250,6 +254,7 @@ var additivesEN = map[Additive]string{
 var additiveDE = map[Additive]string{
 	Color:           "mit Farbstoff",
 	Caffeine:        "mit Coffein",
+	UnknownThree:    "unbekannt (3)",
 	Preservatives:   "mit Konservierungsstoff",
 	Sweeteners:      "mit Süßungsmittel",
 	Antioxidant:     "mit Antioxidationsmittel",
@@ -268,8 +273,12 @@ func (a Allergen) Cmp(other Allergen) int {
 }
 
 func (a Allergen) Known() bool {
-	_, ok := allergenOrder[a]
-	return ok
+	return allergenOrder.Has(a)
+}
+
+func (a Allergen) Normalize() (Allergen, bool) {
+	key, _, ok := allergenOrder.Get(a)
+	return key, ok
 }
 
 func (a Allergen) ENString() string {
@@ -378,12 +387,12 @@ type Ingredient string
 var pictogramRegexp = regexp.MustCompile(regexp.QuoteMeta("https://www.max-manager.de/daten-extern/sw-erlangen-nuernberg/icons/") + `([^\.]+)` + regexp.QuoteMeta(".png"))
 
 // ParseIngredients parses ingredients from a list of pictograms
-func ParseIngredients(s string, logger *zerolog.Logger) []Ingredient {
+func (menu *MenuItem) parseIngredients(s string, logger *zerolog.Logger) []Ingredient {
 	ingredients := make(map[Ingredient]struct{})
 	for _, match := range pictogramRegexp.FindAllStringSubmatch(s, -1) {
 		ing := Ingredient(match[1])
 		if !ing.Known() {
-			logger.Error().Str("ingredient", match[1]).Msg("Unknown Ingredient")
+			logger.Error().Str("ingredient", match[1]).Time("day", menu.Day.Time()).Str("location", string(menu.Location)).Msg("Unknown Ingredient")
 			continue
 		}
 		ingredients[ing] = struct{}{}
@@ -405,7 +414,7 @@ const (
 	Vegan      Ingredient = "veg"
 	Organic    Ingredient = "Bio"
 	FishMSC    Ingredient = "MSC"
-	Alcohol    Ingredient = "O" //  TODO: Is this the right annotation
+	Alcohol    Ingredient = "A"
 
 	Glutenfree Ingredient = "Gf"
 	MensaVital Ingredient = "MV"
@@ -458,8 +467,12 @@ func (i Ingredient) Cmp(other Ingredient) int {
 }
 
 func (i Ingredient) Known() bool {
-	_, ok := ingredientOrder[i]
-	return ok
+	return ingredientOrder.Has(i)
+}
+
+func (i Ingredient) Normalize() (Ingredient, bool) {
+	key, _, ok := ingredientOrder.Get(i)
+	return key, ok
 }
 
 func (i Ingredient) ENString() string {
@@ -482,10 +495,10 @@ func (i Ingredient) DEDef() template.HTML {
 	return template.HTML("<a class='annot' href='#ing-" + string(i) + "' title='" + i.DEString() + "'>" + i.DEString() + "</a>")
 }
 
-func order[T comparable](values ...T) map[T]int {
-	m := make(map[T]int, len(values))
+func order[T ~string](values ...T) FMap[T, int] {
+	m := make(FMap[T, int], len(values))
 	for index, item := range values {
-		m[item] = index
+		m.Add(item, index)
 	}
 	return m
 }
