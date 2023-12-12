@@ -95,8 +95,6 @@ func fixAnnotTypos(annots []string) []string {
 			fix = append(fix, "Ei")
 		case "Mi7":
 			fix = append(fix, "Mi", "7")
-		case "11":
-			fix = append(fix, "1")
 		case "Sul": // Not sure about this one
 			fix = append(fix, "Su")
 		case "VWz":
@@ -110,15 +108,13 @@ func fixAnnotTypos(annots []string) []string {
 		case "Sun":
 			fix = append(fix, "So")
 		case "Ma":
-			fix = append(fix, "Man") // TODO: not sure about this one (maybe even a new ingredient)?
+			fix = append(fix, "Man")
 		case "Wed":
 			fix = append(fix, "Mi")
 		case "Se":
 			fix = append(fix, "Wa")
-		case "3":
-			// TODO: Don't know what this stands for.
-			// It occurred in only a few menus.
-		case "cond": // ignore this (appears only in one translation)
+		case "3", "cond":
+			// these are mismatches and no longer used
 		default:
 			fix = append(fix, a)
 		}
@@ -185,20 +181,20 @@ type Additive string
 const (
 	Color           Additive = "1"
 	Caffeine        Additive = "2"
-	UnknownThree    Additive = "3" // TODO: What is this?
 	Preservatives   Additive = "4"
 	Sweeteners      Additive = "5"
 	Antioxidant     Additive = "7"
 	FlavorEnhancers Additive = "8"
 	Sulphurated     Additive = "9"
 	Blackened       Additive = "10"
+	Waxed           Additive = "11"
 	Phosphate       Additive = "12"
 	Phenylalanine   Additive = "13"
 	Coating         Additive = "30"
 )
 
 var additiveOrder = order(
-	Color, Caffeine /*UnknownThree,*/, Preservatives, Sweeteners, Antioxidant, FlavorEnhancers, Sulphurated, Blackened, Phosphate, Phenylalanine,
+	Color, Caffeine, Preservatives, Sweeteners, Antioxidant, FlavorEnhancers, Sulphurated, Blackened, Waxed, Phosphate, Phenylalanine,
 	Coating,
 )
 
@@ -233,30 +229,30 @@ func (a Additive) DEHTML() template.HTML {
 var additivesEN = map[Additive]string{
 	Color:           "contains colour additives",
 	Caffeine:        "contains caffeine",
-	UnknownThree:    "unknown (3)",
 	Preservatives:   "contains preservatives",
 	Sweeteners:      "contains sweeteners",
 	Antioxidant:     "contains antioxidant",
 	FlavorEnhancers: "contains flavour enhancers",
 	Sulphurated:     "sulphurated",
 	Blackened:       "blackened",
+	Waxed:           "waxed",
 	Phosphate:       "contains phosphate",
-	Phenylalanine:   "contains sweeteners, contains a source of phenylalanine",
+	Phenylalanine:   "contains sweeteners = contains a source of phenylalanine",
 	Coating:         "compound coating",
 }
 
 var additiveDE = map[Additive]string{
 	Color:           "mit Farbstoff",
 	Caffeine:        "mit Coffein",
-	UnknownThree:    "unbekannt (3)",
 	Preservatives:   "mit Konservierungsstoff",
 	Sweeteners:      "mit Süßungsmittel",
 	Antioxidant:     "mit Antioxidationsmittel",
 	FlavorEnhancers: "mit Geschmacksverstärker",
 	Sulphurated:     "geschwefelt",
 	Blackened:       "geschwärzt",
+	Waxed:           "gewachst",
 	Phosphate:       "mit Phosphat",
-	Phenylalanine:   "enthält eine Phenylalaninquelle",
+	Phenylalanine:   "mit Süßungsmittel = enthält eine Phenylalaninquelle",
 	Coating:         "mit Fettglasur",
 }
 
@@ -323,55 +319,55 @@ var allergenOrder = order(
 )
 
 var allergensEN = map[Allergen]string{
-	Wheat:         "Cereals containing gluten wheat (spelt, kamut)",
-	Rye:           "Cereals containing gluten rye",
-	Barley:        "Cereals containing gluten barley",
-	Oats:          "Cereals containing gluten oats",
-	Crustaceans:   "contains Crustaceans",
-	Eggs:          "Eggs",
-	Fish:          "Fish",
-	Peanuts:       "Peanuts",
-	Soybeans:      "Soybeans",
-	Milk:          "Milk/milk sugar",
-	Almonds:       "Almonds",
-	HazelNuts:     "Hazelnuts",
-	WalNuts:       "Walnuts",
-	CashewNuts:    "Cashew nuts",
-	PecanNuts:     "Pecan nuts",
-	BrazilNuts:    "Brazil nuts",
-	Pistachios:    "Pistachios",
-	MacadamiaNuts: "Macadamia nuts",
-	Celeriac:      "Celeriac",
-	Mustard:       "Mustard",
-	Sesame:        "Sesame",
-	Sulphur:       "Sulphur dioxide and sulphites",
-	Lupines:       "Lupines",
-	Mollusca:      "Mollusca",
+	Wheat:         "cereals containing gluten wheat (spelt, kamut)",
+	Rye:           "cereals containing gluten rye",
+	Barley:        "cereals containing gluten barley",
+	Oats:          "cereals containing gluten oats",
+	Crustaceans:   "contains crustaceans",
+	Eggs:          "eggs",
+	Fish:          "fish",
+	Peanuts:       "peanuts",
+	Soybeans:      "soybeans",
+	Milk:          "milk/lactose",
+	Almonds:       "almonds",
+	HazelNuts:     "hazelnuts",
+	WalNuts:       "walnuts",
+	CashewNuts:    "cashew nuts",
+	PecanNuts:     "pecan nuts",
+	BrazilNuts:    "brazil nuts",
+	Pistachios:    "pistachios",
+	MacadamiaNuts: "macadamia nuts",
+	Celeriac:      "celeriac",
+	Mustard:       "mustard",
+	Sesame:        "sesame",
+	Sulphur:       "sulphur dioxide and sulphites",
+	Lupines:       "lupines",
+	Mollusca:      "mollusca",
 }
 
 var allergensDE = map[Allergen]string{
-	Wheat:         "Weizen(Dinkel,Kamut)",
-	Rye:           "Roggen",
-	Barley:        "Gerste",
-	Oats:          "Hafer",
+	Wheat:         "glutenhaltiges Getreide Weizen (Dinkel, Kamut)",
+	Rye:           "glutenhaltiges Getreide Roggen",
+	Barley:        "glutenhaltiges Getreide Gerste",
+	Oats:          "glutenhaltiges Getreide Hafer",
 	Crustaceans:   "Krebstiere",
 	Eggs:          "Eier",
 	Fish:          "Fisch",
 	Peanuts:       "Erdnüsse",
 	Soybeans:      "Sojabohnen",
 	Milk:          "Milch/Laktose",
-	Almonds:       "Mandeln",
-	HazelNuts:     "Haselnüsse",
-	WalNuts:       "Walnüsse",
-	CashewNuts:    "Kaschu(Cashew)nüsse",
-	PecanNuts:     "Pekannüsse",
-	BrazilNuts:    "Paranüsse",
+	Almonds:       "Schalenfrüchte Mandeln",
+	HazelNuts:     "Schalenfrüchte Haselnüsse",
+	WalNuts:       "Schalenfrüchte Walnüsse",
+	CashewNuts:    "Schalenfrüchte Kaschu(Cashew)nüsse",
+	PecanNuts:     "Schalenfrüchte Pekannüsse",
+	BrazilNuts:    "Schalenfrüchte Paranüsse",
 	Pistachios:    "Schalenfrüchte Pistazien",
-	MacadamiaNuts: "Macadamianüsse",
+	MacadamiaNuts: "Schalenfrüchte Macadamianüsse",
 	Celeriac:      "Sellerie",
 	Mustard:       "Senf",
 	Sesame:        "Sesam",
-	Sulphur:       "Schwefeldioxid u. Sulfite",
+	Sulphur:       "Schwefeldioxid und Sulfite",
 	Lupines:       "Lupinen",
 	Mollusca:      "Weichtiere",
 }
@@ -397,61 +393,69 @@ func (menu *MenuItem) parseIngredients(s string, logger *zerolog.Logger) []Ingre
 }
 
 const (
-	Pork       Ingredient = "S"
-	Beef       Ingredient = "R"
-	Poultry    Ingredient = "G"
-	Lamb       Ingredient = "L"
-	Game       Ingredient = "W"
-	FishI      Ingredient = "F"
 	Vegetarian Ingredient = "V"
+
+	Beef    Ingredient = "R"
+	Poultry Ingredient = "G"
+	Lamb    Ingredient = "L"
+	FishI   Ingredient = "F"
+	Pork    Ingredient = "S"
+	Game    Ingredient = "W"
+
 	Vegan      Ingredient = "veg"
+	MensaVital Ingredient = "MV"
 	Organic    Ingredient = "Bio"
 	FishMSC    Ingredient = "MSC"
-	Alcohol    Ingredient = "A"
 
+	Alcohol    Ingredient = "A"
 	Glutenfree Ingredient = "Gf"
-	MensaVital Ingredient = "MV"
 	CO2Neutral Ingredient = "CO2"
 )
 
 var ingredientOrder = order(
-	Pork, Beef, Poultry, Lamb, Game, FishI, Vegetarian, Vegan, Organic, FishMSC,
-	Alcohol, MensaVital, CO2Neutral, Glutenfree,
+	Vegetarian,
+	Beef, Poultry, Lamb, FishI, Pork, Game,
+	Vegan, MensaVital, Organic, FishMSC,
+	Alcohol, Glutenfree, CO2Neutral,
 )
 
 var ingredientEN = map[Ingredient]string{
-	Pork:       "Pork",
-	Beef:       "Beef",
-	Poultry:    "Poultry",
-	Lamb:       "Lamb",
-	Game:       "Game",
-	FishI:      "Fish",
-	Vegetarian: "Vegetarian",
-	Vegan:      "Vegan",
+	Vegetarian: "vegetarian",
+
+	Beef:    "beef",
+	Poultry: "poultry",
+	Lamb:    "lamb",
+	FishI:   "fish",
+	Pork:    "pork",
+	Game:    "game",
+
+	Vegan:      "vegan",
+	MensaVital: "Cafeteria Vital",
 	Organic:    "organic (certified by DE-ÖKO-006)",
 	FishMSC:    "sustainable fish (certified by MSC - C - 51840)",
-	Alcohol:    "with alcohol",
 
-	Glutenfree: "Gluten Free",
-	MensaVital: "Mensa Vital",
+	Alcohol:    "with alcohol",
+	Glutenfree: "gluten free",
 	CO2Neutral: "CO2 Neutral",
 }
 
 var ingredientDE = map[Ingredient]string{
-	Pork:       "Schwein",
-	Beef:       "Rind",
-	Poultry:    "Geflügel",
-	Lamb:       "Lamm",
-	Game:       "Wild",
-	FishI:      "Fisch",
 	Vegetarian: "Vegetarisch",
+
+	Beef:    "Rind",
+	Poultry: "Geflügel",
+	Lamb:    "Lamm",
+	FishI:   "Fisch",
+	Pork:    "Schwein",
+	Game:    "Wild",
+
 	Vegan:      "Vegan",
+	MensaVital: "Mensa Vital",
 	Organic:    "aus biologischem Anbau DE-ÖKO-006",
 	FishMSC:    "zertifizierte nachhaltige Fischerei - MSC - C - 51840",
-	Alcohol:    "mit Alkohol",
 
+	Alcohol:    "mit Alkohol",
 	Glutenfree: "Glutenfrei",
-	MensaVital: "Mensa Vital",
 	CO2Neutral: "CO2 Neutral",
 }
 
