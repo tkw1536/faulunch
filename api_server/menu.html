@@ -14,9 +14,9 @@
             {{ .Alternate }}
 
             {{ if $english }}
-            <a href="/en/">Back To Overview</a>
+                <a href="/en/">Back To Overview</a>
             {{ else }}
-            <a href="/de/">Zurück zur Übersicht</a>
+                <a href="/de/">Zurück zur Übersicht</a>
             {{ end }}
         </p>
     </nav>
@@ -26,265 +26,264 @@
 {{ $needBrokenEnglishNote := false }}
 <main>
     {{ if $english }}
-    <p>
-        This page contains a simple menu for <em>{{ $loc.Name }}</em> ({{$loc.Address}}) on {{.Day.ENHTML}}.
-    </p>
+        <p>
+            This page contains a simple menu for <em>{{ $loc.Name }}</em> ({{$loc.Address}}) on {{.Day.ENHTML}}.
+        </p>
 
-    <h2 id="menu">This Menu</h2>
+        <h2 id="menu">This Menu</h2>
     {{ else }}
-    <p>
-        Diese Seite enthält ein einfaches Menu der <em>{{ $loc.Name }}</em> ({{$loc.Address}}) für {{.Day.DEHTML}}.
-    </p>
+        <p>
+            Diese Seite enthält ein einfaches Menu der <em>{{ $loc.Name }}</em> ({{$loc.Address}}) für {{.Day.DEHTML}}.
+        </p>
 
-    <h2 id="menu">Dieses Menü</h2>
+        <h2 id="menu">Dieses Menü</h2>
     {{ end }}
 
     <nav>
         <ul>
             {{ range .Items }}
-            <li>
-                <a href="#{{ $annotate.ID .Category }}">{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</a>
-            </li>
+                <li>
+                    <a href="#{{ $annotate.ID .Category }}">{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</a>
+                </li>
             {{ end }}
         </ul>
     </nav>
 
     {{ range .Items }}
+        <h3 id="{{ $annotate.ID .Category }}">{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</h3>
+        <section>
+            {{ if $english }}
+                {{ if .TitleEN }}
+                    <p>{{ .HTMLTitleEN }}</p>
+                {{ else }}
+                    <p lang="de">
+                        {{ .HTMLTitleDE }}
+                        <span role="note" lang="en">Unfortunately this description is only available in German.</span>
+                    </p>
+                {{ end }}
+            {{ else }}
+                {{ if .TitleDE }}
+                    <p>{{ .HTMLTitleDE }}</p>
+                {{ end }}
+            {{ end }}
 
-    <h3 id="{{ $annotate.ID .Category }}">{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</h3>
+            {{ if .Ingredients }}
+                <ul class="inline">
+                    {{ range .Ingredients }}
+                        <li>{{ if $english }}{{ .ENDef }}{{ else }}{{ .DEDef }}{{ end }}</li>
+                    {{ end }}
+                </ul>
+            {{ end }}
 
-    {{ if $english }}
-    {{ if .TitleEN }}
-    <p>{{ .HTMLTitleEN }}</p>
-    {{ else }}
-    <p lang="de">
-        {{ .HTMLTitleDE }}
-        <span role="note" lang="en">Unfortunately this description is only available in German.</span>
-    </p>
-    {{ end }}
-    {{ else }}
-    {{ if .TitleDE }}
-    <p>{{ .HTMLTitleDE }}</p>
-    {{ end }}
-    {{ end }}
+            {{ if $english }}
+                {{ if .DescriptionEN }}
+                    <p>
+                        {{ .HTMLDescriptionEN }}
+                        {{ $needBrokenEnglishNote = true }}
+                        <span role="note"><a href="#broken-english-note" title="Explanation why description is sometimes only available in German">Unfortunately this description is sometimes only available in German. </a></span>
+                    </p>
+                {{ end }}
+                {{ if .BeilagenEN }}
+                    <p>
+                        {{ .HTMLBeilagenEN }}
+                        {{ $needBrokenEnglishNote = true }}
+                        <span role="note"><a href="#broken-english-note" title="Explanation why description is sometimes only available in German" role="note">Unfortunately this description is sometimes only available in German. </a></span>
+                    </p>
+                {{ end }}
+            {{ else }}
+                {{ if .DescriptionDE }}
+                    <p>{{ .HTMLDescriptionDE }}</p>
+                {{ end }}
+                {{ if .BeilagenDE }}
+                    <p>{{ .HTMLBeilagenDE }}</p>
+                {{ end }}
+            {{ end }}
+            <div>
+                <details open>
+                    <summary>{{ if $english }}Price{{ else }}Preis{{ end }}</summary>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{ if $english }}Group{{ else }}Gruppe{{ end }}
+                                </th>
+                                <th>
+                                    {{ if $english }}Price{{ else }}Preis{{ end }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ if $english }}Student{{ else }}Student{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mn>{{ if $english }}{{ .Preis1.ENString }}{{ else }}{{ .Preis1.DEString }}{{ end }}</mn>
+                                        <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                        <mi mathvariant='normal' class='MathML-Unit'>€</mi>
+                                    </math>
+                                </td>
+                            </tr>
 
-    {{ if .Ingredients }}
-    <ul class="inline">
-        {{ range .Ingredients }}
-        <li>{{ if $english }}{{ .ENDef }}{{ else }}{{ .DEDef }}{{ end }}</li>
-        {{ end }}
-    </ul>
-    {{ end }}
+                            <tr>
+                                <td>{{ if $english }}Employee{{ else }}Mitarbeiter{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mn>{{ if $english }}{{ .Preis2.ENString }}{{ else }}{{ .Preis2.DEString }}{{ end }}</mn>
+                                        <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                        <mi mathvariant='normal' class='MathML-Unit'>€</mi>
+                                    </math>
+                                </td>
+                            </tr>
 
-    {{ if $english }}
-    {{ if .DescriptionEN }}
-    <p>
-        {{ .HTMLDescriptionEN }}
-        {{ $needBrokenEnglishNote = true }}
-        <span role="note"><a href="#broken-english-note" title="Explanation why description is sometimes only available in German">Unfortunately this description is sometimes only available in German. </a></span>
-    </p>
-    {{ end }}
-    {{ if .BeilagenEN }}
-    <p>
-        {{ .HTMLBeilagenEN }}
-        {{ $needBrokenEnglishNote = true }}
-        <span role="note"><a href="#broken-english-note" title="Explanation why description is sometimes only available in German" role="note">Unfortunately this description is sometimes only available in German. </a></span>
-    </p>
-    {{ end }}
-    {{ else }}
-    {{ if .DescriptionDE }}
-    <p>{{ .HTMLDescriptionDE }}</p>
-    {{ end }}
-    {{ if .BeilagenDE }}
-    <p>{{ .HTMLBeilagenDE }}</p>
-    {{ end }}
-    {{ end }}
-    <div>
-        <details open>
-            <summary>{{ if $english }}Price{{ else }}Preis{{ end }}</summary>
-            <table>
-                <thead>
-                    <tr>
-                        <th>
-                            {{ if $english }}Group{{ else }}Gruppe{{ end }}
-                        </th>
-                        <th>
-                            {{ if $english }}Price{{ else }}Preis{{ end }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{ if $english }}Student{{ else }}Student{{ end }}</td>
-                        <td>
-                            <math>
-                                <mn>{{ if $english }}{{ .Preis1.ENString }}{{ else }}{{ .Preis1.DEString }}{{ end }}</mn>
-                                <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                <mi mathvariant='normal' class='MathML-Unit'>€</mi>
-                            </math>
-                        </td>
-                    </tr>
+                            <tr>
+                                <td>{{ if $english }}Guest{{ else }}Gast{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mn>{{ if $english }}{{ .Preis3.ENString }}{{ else }}{{ .Preis3.DEString }}{{ end }}</mn>
+                                        <mo>&InvisibleTimes;</mo>
+                                        <mi mathvariant='normal' class='MathML-Unit'>€</mi>
+                                    </math>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </details>
 
-                    <tr>
-                        <td>{{ if $english }}Employee{{ else }}Mitarbeiter{{ end }}</td>
-                        <td>
-                            <math>
-                                <mn>{{ if $english }}{{ .Preis2.ENString }}{{ else }}{{ .Preis2.DEString }}{{ end }}</mn>
-                                <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                <mi mathvariant='normal' class='MathML-Unit'>€</mi>
-                            </math>
-                        </td>
-                    </tr>
+                <details>
+                    <summary>{{ if $english }}Nutritional values{{ else }}Nährwertangaben{{ end }}</summary>
 
-                    <tr>
-                        <td>{{ if $english }}Guest{{ else }}Gast{{ end }}</td>
-                        <td>
-                            <math>
-                                <mn>{{ if $english }}{{ .Preis3.ENString }}{{ else }}{{ .Preis3.DEString }}{{ end }}</mn>
-                                <mo>&InvisibleTimes;</mo>
-                                <mi mathvariant='normal' class='MathML-Unit'>€</mi>
-                            </math>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </details>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{ if $english }}Nutrient{{ else }}Nährstoff{{ end }}
+                                </th>
+                                <th>
+                                    {{ if $english }}Amount per portion{{ else }}Menge pro Portion{{ end }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ if $english }}Energy{{ else }}Energie{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mrow>
+                                            <mn>{{ if $english }}{{ .Kcal.ENString }}{{ else }}{{ .Kcal.DEString }}{{ end }}</mn>
+                                            <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                            <mi mathvariant='normal' class='MathML-Unit'>Kcal</mi>
+                                        </mrow>
+                                    </math>
+                                    /
+                                    <math>
+                                        <mrow>
+                                            <mn>{{ if $english }}{{ .Kj.ENString }}{{ else }}{{ .Kj.DEString }}{{ end }}</mn>
+                                            <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                            <mi mathvariant='normal' class='MathML-Unit'>kJ</mi>
+                                        </mrow>
+                                    </math>
+                                </td>
+                            </tr>
 
-        <details>
-            <summary>{{ if $english }}Nutritional values{{ else }}Nährwertangaben{{ end }}</summary>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>
-                            {{ if $english }}Nutrient{{ else }}Nährstoff{{ end }}
-                        </th>
-                        <th>
-                            {{ if $english }}Amount per portion{{ else }}Menge pro Portion{{ end }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{ if $english }}Energy{{ else }}Energie{{ end }}</td>
-                        <td>
-                            <math>
-                                <mrow>
-                                    <mn>{{ if $english }}{{ .Kcal.ENString }}{{ else }}{{ .Kcal.DEString }}{{ end }}</mn>
-                                    <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                    <mi mathvariant='normal' class='MathML-Unit'>Kcal</mi>
-                                </mrow>
-                            </math>
-                            /
-                            <math>
-                                <mrow>
-                                    <mn>{{ if $english }}{{ .Kj.ENString }}{{ else }}{{ .Kj.DEString }}{{ end }}</mn>
-                                    <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                    <mi mathvariant='normal' class='MathML-Unit'>kJ</mi>
-                                </mrow>
-                            </math>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>{{ if $english }}Fat{{ else }}Fett{{ end }}</td>
-                        <td>
-                            <math>
-                                <mrow>
-                                    <mn>{{ if $english }}{{ .Fett.ENString }}{{ else }}{{ .Fett.DEString }}{{ end }}</mn>
-                                    <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                    <mi mathvariant='normal' class='MathML-Unit'>g</mi>
-                                </mrow>
-                            </math>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="indent">{{ if $english }}saturated fatty acids{{ else }}davon gesättigte Fettsäuren{{ end }}</td>
-                        <td>
-                            <math>
-                                <mrow>
-                                    <mn>{{ if $english }}{{ .Gesfett.ENString }}{{ else }}{{ .Gesfett.DEString }}{{ end }}</mn>
-                                    <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                    <mi mathvariant='normal' class='MathML-Unit'>g</mi>
-                                </mrow>
-                            </math>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ if $english }}Carbohydrates{{ else }}Kohlenhydrate{{ end }}</td>
-                        <td>
-                            <math>
-                                <mrow>
-                                    <mn>{{ if $english }}{{ .Kh.ENString }}{{ else }}{{ .Kh.DEString }}{{ end }}</mn>
-                                    <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                    <mi mathvariant='normal' class='MathML-Unit'>g</mi>
-                                </mrow>
-                            </math>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="indent">{{ if $english }}Sugar{{ else }}davon Zucker{{ end }}</td>
-                        <td>
-                            <math>
-                                <mrow>
-                                    <mn>{{ if $english }}{{ .Zucker.ENString }}{{ else }}{{ .Zucker.DEString }}{{ end }}</mn>
-                                    <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                    <mi mathvariant='normal' class='MathML-Unit'>g</mi>
-                                </mrow>
-                            </math>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ if $english }}Dietary fibre{{ else }}Ballaststoffe{{ end }}</td>
-                        <td>
-                            <math>
-                                <mrow>
-                                    <mn>{{ if $english }}{{ .Ballaststoffe.ENString }}{{ else }}{{ .Ballaststoffe.DEString }}{{ end }}</mn>
-                                    <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                    <mi mathvariant='normal' class='MathML-Unit'>g</mi>
-                                </mrow>
-                            </math>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ if $english }}Protein{{ else }}Eiweiss{{ end }}</td>
-                        <td>
-                            <math>
-                                <mrow>
-                                    <mn>{{ if $english }}{{ .Eiweiss.ENString }}{{ else }}{{ .Eiweiss.DEString }}{{ end }}</mn>
-                                    <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                    <mi mathvariant='normal' class='MathML-Unit'>g</mi>
-                                </mrow>
-                            </math>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ if $english }}Salt{{ else }}Salz{{ end }}</td>
-                        <td>
-                            <math>
-                                <mrow>
-                                    <mn>{{ if $english }}{{ .Salz.ENString }}{{ else }}{{ .Salz.DEString }}{{ end }}</mn>
-                                    <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
-                                    <mi mathvariant='normal' class='MathML-Unit'>g</mi>
-                                </mrow>
-                            </math>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </details>
-    </div>
-
+                            <tr>
+                                <td>{{ if $english }}Fat{{ else }}Fett{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mrow>
+                                            <mn>{{ if $english }}{{ .Fett.ENString }}{{ else }}{{ .Fett.DEString }}{{ end }}</mn>
+                                            <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                            <mi mathvariant='normal' class='MathML-Unit'>g</mi>
+                                        </mrow>
+                                    </math>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="indent">{{ if $english }}saturated fatty acids{{ else }}davon gesättigte Fettsäuren{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mrow>
+                                            <mn>{{ if $english }}{{ .Gesfett.ENString }}{{ else }}{{ .Gesfett.DEString }}{{ end }}</mn>
+                                            <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                            <mi mathvariant='normal' class='MathML-Unit'>g</mi>
+                                        </mrow>
+                                    </math>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ if $english }}Carbohydrates{{ else }}Kohlenhydrate{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mrow>
+                                            <mn>{{ if $english }}{{ .Kh.ENString }}{{ else }}{{ .Kh.DEString }}{{ end }}</mn>
+                                            <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                            <mi mathvariant='normal' class='MathML-Unit'>g</mi>
+                                        </mrow>
+                                    </math>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="indent">{{ if $english }}Sugar{{ else }}davon Zucker{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mrow>
+                                            <mn>{{ if $english }}{{ .Zucker.ENString }}{{ else }}{{ .Zucker.DEString }}{{ end }}</mn>
+                                            <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                            <mi mathvariant='normal' class='MathML-Unit'>g</mi>
+                                        </mrow>
+                                    </math>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ if $english }}Dietary fibre{{ else }}Ballaststoffe{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mrow>
+                                            <mn>{{ if $english }}{{ .Ballaststoffe.ENString }}{{ else }}{{ .Ballaststoffe.DEString }}{{ end }}</mn>
+                                            <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                            <mi mathvariant='normal' class='MathML-Unit'>g</mi>
+                                        </mrow>
+                                    </math>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ if $english }}Protein{{ else }}Eiweiss{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mrow>
+                                            <mn>{{ if $english }}{{ .Eiweiss.ENString }}{{ else }}{{ .Eiweiss.DEString }}{{ end }}</mn>
+                                            <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                            <mi mathvariant='normal' class='MathML-Unit'>g</mi>
+                                        </mrow>
+                                    </math>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ if $english }}Salt{{ else }}Salz{{ end }}</td>
+                                <td>
+                                    <math>
+                                        <mrow>
+                                            <mn>{{ if $english }}{{ .Salz.ENString }}{{ else }}{{ .Salz.DEString }}{{ end }}</mn>
+                                            <mo rspace='thickmathspace'>&InvisibleTimes;</mo>
+                                            <mi mathvariant='normal' class='MathML-Unit'>g</mi>
+                                        </mrow>
+                                    </math>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </details>
+            </div>
+        </section>
     {{ end }}
 
     {{ if $needBrokenEnglishNote }}
-    <div>
-        <p role="note" class="broken-english-note" id="broken-english-note">
-            It sometimes happens that specific descriptions are only available in German.
-            This is a flaw in the original data, we receive german content in fields labeled as containing english text.
-            Unfortunately we cannot detect or fix this automatically.
-        </p>
-    </div>
+        <div>
+            <p role="note" class="broken-english-note" id="broken-english-note">
+                It sometimes happens that specific descriptions are only available in German.
+                This is a flaw in the original data, we receive german content in fields labeled as containing english text.
+                Unfortunately we cannot detect or fix this automatically.
+            </p>
+        </div>
     {{ end }}
 
     <h2 id="legend">
@@ -297,96 +296,96 @@
 
     <div>
         {{ if .Ingredients }}
-        <table>
-            <caption>{{ if $english }}Ingredients{{ else }}Zutaten{{ end }}</caption>
-            <thead>
-                <tr>
-                    <th>
-                        {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
-                    </th>
-                    <th>
-                        {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {{ range .Ingredients }}
-                <tr id="ing-{{.}}">
-                    <td>
-                        {{ . }}
-                    </td>
-                    <td>
-                        {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
-                    </td>
-                </tr>
-                {{ end }}
-            </tbody>
-        </table>
+            <table>
+                <caption>{{ if $english }}Ingredients{{ else }}Zutaten{{ end }}</caption>
+                <thead>
+                    <tr>
+                        <th>
+                            {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
+                        </th>
+                        <th>
+                            {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Ingredients }}
+                    <tr id="ing-{{.}}">
+                        <td>
+                            {{ . }}
+                        </td>
+                        <td>
+                            {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
         {{ end }}
 
         {{ if .Additives }}
-        <table>
-            <caption>{{ if $english }}Additives{{ else }}Additive{{ end }}</caption>
-            <thead>
-                <tr>
-                    <th>
-                        {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
-                    </th>
-                    <th>
-                        {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {{ range .Additives }}
-                <tr id="add-{{.}}">
-                    <td>
-                        {{ . }}
-                    </td>
-                    <td>
-                        {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
-                    </td>
-                </tr>
-                {{ end }}
-            </tbody>
-        </table>
+            <table>
+                <caption>{{ if $english }}Additives{{ else }}Additive{{ end }}</caption>
+                <thead>
+                    <tr>
+                        <th>
+                            {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
+                        </th>
+                        <th>
+                            {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Additives }}
+                    <tr id="add-{{.}}">
+                        <td>
+                            {{ . }}
+                        </td>
+                        <td>
+                            {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
         {{ end }}
 
         {{ if .Allergens }}
-        <table>
-            <caption>{{ if $english }}Allergens{{ else }}Allergene{{ end }}</caption>
-            <thead>
-                <tr>
-                    <th>
-                        {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
-                    </th>
-                    <th>
-                        {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {{ range .Allergens }}
-                <tr id="all-{{.}}">
-                    <td>
-                        {{ . }}
-                    </td>
-                    <td>
-                        {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
-                    </td>
-                </tr>
-                {{ end }}
-            </tbody>
-        </table>
+            <table>
+                <caption>{{ if $english }}Allergens{{ else }}Allergene{{ end }}</caption>
+                <thead>
+                    <tr>
+                        <th>
+                            {{ if $english }}Abbreviation{{ else }}Abkürzung{{ end }}
+                        </th>
+                        <th>
+                            {{ if $english }}Meaning{{ else }}Bedeutung{{ end }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Allergens }}
+                        <tr id="all-{{.}}">
+                            <td>
+                                {{ . }}
+                            </td>
+                            <td>
+                                {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
+                            </td>
+                        </tr>
+                    {{ end }}
+                </tbody>
+            </table>
         {{ end }}
     </div>
 
 
     <h2 id="other">
         {{ if .English }}
-        Other Menus
+            Other Menus
         {{ else }}
-        Andere Menüs
+            Andere Menüs
         {{ end }}
     </h2>
 

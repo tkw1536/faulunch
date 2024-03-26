@@ -24,9 +24,9 @@
     
     <h2>
         {{ if .English }}
-        List Of Places To Eat
+            List Of Places To Eat
         {{ else }}
-        Liste von Orten
+            Liste von Orten
         {{ end }}
     </h2>
     
@@ -34,10 +34,10 @@
     <ul>
         {{ $english := .English }}
         {{ range .Locations }}
-        {{ $desc := .Description }}
-        <li>
-            <a href="/{{ if $english }}en{{else}}de{{end}}/{{.}}" title="{{ if $english }}Menu for{{else}}Menü für{{end}} {{ $desc.Name }}">{{ $desc.Name }}</a>, {{ $desc.Type $english }}
-        </li>
+            {{ $desc := .Description }}
+            <li>
+                <a href="/{{ if $english }}en{{else}}de{{end}}/{{.}}" title="{{ if $english }}Menu for{{else}}Menü für{{end}} {{ $desc.Name }}">{{ $desc.Name }}</a>, {{ $desc.Type $english }}
+            </li>
         {{ end }}
     </ul>
 </main>
