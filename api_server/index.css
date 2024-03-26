@@ -149,3 +149,14 @@ h5:hover .autolink,
 h6:hover .autolink {
     opacity: 1;
 }
+
+#autosort-ui .active {
+    font-weight: bold;
+}
+#autosort-list li.sorted-list-item {
+    height: 1.25em;
+}
+
+.autosort-ui summary {
+    font-size: small;
+}

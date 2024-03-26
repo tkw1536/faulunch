@@ -33,14 +33,39 @@
         <h2 id="menu">This Menu</h2>
     {{ else }}
         <p>
-            Diese Seite enthält ein einfaches Menu der <em>{{ $loc.Name }}</em> ({{$loc.Address}}) für {{.Day.DEHTML}}.
+            Diese Seite enthält ein einfaches Menü der <em>{{ $loc.Name }}</em> ({{$loc.Address}}) für {{.Day.DEHTML}}.
         </p>
 
         <h2 id="menu">Dieses Menü</h2>
     {{ end }}
 
     <nav>
-        <ul>
+        <details class="autosort-ui">
+            <summary>
+                {{ if $english }}
+                    Sort
+                {{ else }}
+                    Sortieren
+                {{ end }}
+            </summary>
+
+            <div id="autosort-ui" role="menu"
+                {{ if $english }}
+                    data-increasing-text="Increasing"
+                    data-decreasing-text="Decreasing"
+                {{ else }}
+                    data-increasing-text="Aufsteigend"
+                    data-decreasing-text="Absteigend"
+                {{ end }}>
+                {{ if $english }}
+                    (sorting menu requires JavaScript)
+                {{ else }}
+                    (Menüsortierung benötigt JavaScript)
+                {{ end }}
+            </div>
+        </details>
+
+        <ul id="autosort-list">
             {{ range .Items }}
                 <li>
                     <a href="#{{ $annotate.ID .Category }}">{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</a>
@@ -50,8 +75,8 @@
     </nav>
 
     {{ range .Items }}
-        <h3 id="{{ $annotate.ID .Category }}">{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</h3>
-        <section>
+        <section id="{{ $annotate.ID .Category }}">
+            <h3>{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</h3>
             {{ if $english }}
                 {{ if .TitleEN }}
                     <p>{{ .HTMLTitleEN }}</p>
