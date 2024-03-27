@@ -4,7 +4,6 @@ go 1.22.1
 
 require (
 	github.com/glebarez/sqlite v1.11.0
-	github.com/julienschmidt/httprouter v1.3.0
 	github.com/rs/zerolog v1.32.0
 	github.com/swaggest/swgui v1.8.1
 	github.com/tdewolff/minify v2.3.6+incompatible

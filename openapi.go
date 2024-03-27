@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/swaggest/swgui/v5emb"
 
 	_ "embed"
@@ -14,36 +13,20 @@ import (
 //go:embed openapi.json
 var openAPIJSON []byte
 
-func (server *Server) handleAPI() http.Handler {
-	// build the swagger api
-	swagger := v5emb.NewHandler("FauLunch API", "/api/openapi.json", "/api/")
-
-	// build the router api v1
-	v1router := httprouter.New()
-	v1router.Handle(http.MethodGet, "/api/v1/sync", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		server.handleAPISync(w, r)
-	})
-	v1router.Handle(http.MethodGet, "/api/v1/locations", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		server.handleAPILocations(w, r)
-	})
-	v1router.Handle(http.MethodGet, "/api/v1/menu/:location", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		location := Location(p.ByName("location"))
-		server.handleAPIMenuDays(location, w, r)
-	})
-	v1router.Handle(http.MethodGet, "/api/v1/menu/:location/:day", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		day := ParseDay(p.ByName("day"))
-		location := Location(p.ByName("location"))
-		server.handleAPIMenu(location, day, w, r)
-	})
-
-	var mux http.ServeMux
-	mux.Handle("/api/", swagger)
-	mux.Handle("/api/v1/", v1router)
-	mux.Handle("/api/openapi.json", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// registerAPIRoutes registers API routes to the server mux
+func (server *Server) registerAPIRoutes() {
+	// api + documentation
+	server.mux.Handle("GET /api/", v5emb.NewHandler("FauLunch API", "/api/openapi.json", "/api/"))
+	server.mux.HandleFunc("GET /api/openapi.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(openAPIJSON)
-	}))
-	return &mux
+	})
+
+	// api endpoints
+	server.mux.HandleFunc("GET /api/v1/sync", server.handleAPISync)
+	server.mux.HandleFunc("GET /api/v1/locations", server.handleAPILocations)
+	server.mux.HandleFunc("GET /api/v1/menu/{location}", server.handleAPIMenuDays)
+	server.mux.HandleFunc("GET /api/v1/menu/{location}/{day}", server.handleAPIMenu)
 }
 
 const notFoundError = `{"status":"Not Found"}`
@@ -98,7 +81,9 @@ func (server *Server) handleAPILocations(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(results)
 }
 
-func (server *Server) handleAPIMenuDays(location Location, w http.ResponseWriter, r *http.Request) {
+func (server *Server) handleAPIMenuDays(w http.ResponseWriter, r *http.Request) {
+	location := Location(r.PathValue("location"))
+
 	logger := server.Logger.With().Str("route", "API.MenuDays").Str("location", string(location)).Logger()
 
 	// get the day to start with
@@ -148,7 +133,10 @@ func (server *Server) handleAPIMenuDays(location Location, w http.ResponseWriter
 	json.NewEncoder(w).Encode(results)
 }
 
-func (server *Server) handleAPIMenu(location Location, day Day, w http.ResponseWriter, r *http.Request) {
+func (server *Server) handleAPIMenu(w http.ResponseWriter, r *http.Request) {
+	day := ParseDay(r.PathValue("day"))
+	location := Location(r.PathValue("location"))
+
 	logger := server.Logger.With().Str("route", "API.Menu").Str("location", string(location)).Stringer("day", day).Logger()
 
 	results, err := server.API.MenuItems(location, day)

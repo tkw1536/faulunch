@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/rs/zerolog"
 	"github.com/tkw1536/faulunch/internal"
 	"golang.org/x/text/language"
@@ -20,12 +19,13 @@ var apiServerData embed.FS
 var apiServerTemplate = template.Must(template.ParseFS(apiServerData, "api_server/*.html", "api_server/index.js", "api_server/index.css"))
 
 type Server struct {
-	API    *API
 	Logger *zerolog.Logger
 
-	init   sync.Once
-	router *httprouter.Router
-	Legal  ServerLegal
+	init sync.Once
+	mux  http.ServeMux
+
+	API   API
+	Legal ServerLegal
 }
 
 type ServerLegal struct {
@@ -59,9 +59,11 @@ var regexpValidLocation = regexp.MustCompile("^[aA-zZ0-9-_]+$")
 
 func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	server.init.Do(func() {
-		server.router = httprouter.New()
-
-		server.router.Handle(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		server.mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/" && r.URL.Path != "" {
+				http.NotFound(w, r)
+				return
+			}
 			tag, _ := language.MatchStrings(matcher, r.Header.Get("Accept-Language"))
 			if tag == language.German {
 				http.Redirect(w, r, "/de/", http.StatusTemporaryRedirect)
@@ -71,10 +73,10 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		})
 
 		// index
-		server.router.Handle(http.MethodGet, "/en/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		server.mux.HandleFunc("GET /en/", func(w http.ResponseWriter, r *http.Request) {
 			server.HandleIndex(true, w, r)
 		})
-		server.router.Handle(http.MethodGet, "/de/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		server.mux.HandleFunc("GET /de/", func(w http.ResponseWriter, r *http.Request) {
 			server.HandleIndex(false, w, r)
 		})
 
@@ -85,7 +87,7 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if !regexpValidLocation.MatchString(l) || l == "de" || l == "en" {
 				server.Logger.Warn().Str("location", l).Msg("Skipping invalid location")
 			}
-			server.router.Handle(http.MethodGet, "/"+l+"/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+			server.mux.HandleFunc("GET /"+l+"/", func(w http.ResponseWriter, r *http.Request) {
 				tag, _ := language.MatchStrings(matcher, r.Header.Get("Accept-Language"))
 				if tag == language.German {
 					http.Redirect(w, r, "/de/"+l+"/", http.StatusTemporaryRedirect)
@@ -96,35 +98,35 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// location
-		server.router.Handle(http.MethodGet, "/en/:location/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-			location := Location(p.ByName("location"))
+		server.mux.HandleFunc("GET /en/{location}/", func(w http.ResponseWriter, r *http.Request) {
+			location := Location(r.PathValue("location"))
 			server.HandleLocation(location, true, w, r)
 		})
 
-		server.router.Handle(http.MethodGet, "/de/:location/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-			location := Location(p.ByName("location"))
+		server.mux.HandleFunc("GET /de/{location}/", func(w http.ResponseWriter, r *http.Request) {
+			location := Location(r.PathValue("location"))
 			server.HandleLocation(location, false, w, r)
 		})
 
 		// menu
 
-		server.router.Handle(http.MethodGet, "/en/:location/:day", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-			day := ParseDay(p.ByName("day"))
-			location := Location(p.ByName("location"))
+		server.mux.HandleFunc("GET /en/{location}/{day}", func(w http.ResponseWriter, r *http.Request) {
+			day := ParseDay(r.PathValue("day"))
+			location := Location(r.PathValue("location"))
 			server.HandleMenu(location, day, true, w, r)
 		})
 
-		server.router.Handle(http.MethodGet, "/de/:location/:day", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-			day := ParseDay(p.ByName("day"))
-			location := Location(p.ByName("location"))
+		server.mux.HandleFunc("GET /de/{location}/{day}", func(w http.ResponseWriter, r *http.Request) {
+			day := ParseDay(r.PathValue("day"))
+			location := Location(r.PathValue("location"))
 			server.HandleMenu(location, day, false, w, r)
 		})
 
 		// API
-		server.router.Handler(http.MethodGet, "/api/*filepath", server.handleAPI())
+		server.registerAPIRoutes()
 	})
 
-	server.router.ServeHTTP(w, r)
+	server.mux.ServeHTTP(w, r)
 }
 
 type globalContext struct {
@@ -201,7 +203,7 @@ func (server *Server) HandleIndex(english bool, w http.ResponseWriter, r *http.R
 			},
 			Locations: results,
 		}
-		if err := context.loadLastSync(server.API); err != nil {
+		if err := context.loadLastSync(&server.API); err != nil {
 			logger.Debug().Err(err).Msg("LoadLastSync")
 		}
 
@@ -271,7 +273,7 @@ func (server *Server) HandleMenu(location Location, day Day, english bool, w htt
 		Day:      day,
 	}
 
-	if err := mc.loadLastSync(server.API); err != nil {
+	if err := mc.loadLastSync(&server.API); err != nil {
 		logger.Debug().Err(err).Msg("LoadLastSync")
 	}
 

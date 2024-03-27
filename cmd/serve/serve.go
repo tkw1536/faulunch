@@ -79,7 +79,7 @@ func main() {
 	var server http.Handler
 	{
 		server = &faulunch.Server{
-			API: &faulunch.API{
+			API: faulunch.API{
 				DB: db,
 			},
 			Logger: &log,
