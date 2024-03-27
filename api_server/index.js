@@ -16,26 +16,26 @@
             // and add the link to it
             hN.appendChild(a);
         });
-    }
+    };
 })();
 
 (function () {
     // ensure the share api is there
     if (typeof navigator.share !== 'function') {
         console.warn('navigator.share is not a function');
-        return
-    }
+        return;
+    };
 
     // find the element to add the share button to
     const element = document.getElementById('add-share-button');
     if (!element) {
         console.warn('no share to add');
-        return
-    }
+        return;
+    };
 
     // create element
     const a = document.createElement('a');
-    a.setAttribute('href', 'javascript:void(0);')
+    a.setAttribute('href', 'javascript:void(0)');
     a.append(document.createTextNode(document.documentElement.lang !== 'de' ? 'Share' : 'Teilen'));
 
     // add the link
@@ -52,8 +52,8 @@
             'text': metaDescription,
             'title': document.title,
             'url': location.href,
-        })
-    })
+        });
+    });
 })();
 
 (function () {
@@ -71,10 +71,10 @@
 
     // determine all the actual sections
     const items = Array.from(autoSortList.querySelectorAll('li a'))
-        .map(function (a, index) {
+        .map((a) => {
             const li = a.parentElement;
             if (!li) return null;
-            if (li.tagName !== 'LI') return;
+            if (li.tagName !== 'LI') return null;
 
             // get the href element
             const href = a.getAttribute('href');
@@ -84,26 +84,26 @@
             if (!href.startsWith('#')) return null;
             const section = document.getElementById(href.substring(1));
             if (!section) return null;
-            if (section.tagName !== 'SECTION') { return null; }
+            if (section.tagName !== 'SECTION') return null;
 
             // parse all the data values
             const values = Array.from(section.querySelectorAll('tr'))
                 .map(function (tr) {
                     // get the closest summary element
                     const details = tr.closest('details');
-                    if (!details) { return null; }
-                    const summary = details.querySelector('summary')
-                    if (!summary) { return null; }
+                    if (!details) return null;
+                    const summary = details.querySelector('summary');
+                    if (!summary) return null;
                     const category = summary.textContent;
 
 
                     // find elements with exactly two elements
                     const tds = tr.querySelectorAll('td');
-                    if (tds.length != 2) { return null; }
+                    if (tds.length != 2) return null;
 
                     // find all the attributes of this thing
                     const value = tds[1].querySelector('math mn');
-                    if (!value) { return null; }
+                    if (!value) return null;
                     const sort = parseFloat(value.textContent.replaceAll(',', '.'));
 
                     const attr = tds[0].textContent.trim();
@@ -111,7 +111,8 @@
                     // add it to the appropriate critera set
                     if (!criteriaCategories.has(category)) {
                         criteriaCategories.set(category, new Set());
-                    }
+                    };
+
                     criteriaCategories.get(category).add(attr);
 
                     // return a key-value pair
@@ -128,7 +129,7 @@
             return { li: li, values: new Map(values) };
         }).filter(function (e) { return e !== null });
 
-    const doSort = function (criterion, increasing) {
+    const doSort = (criterion, increasing) => {
         // create a copy of the items
         const sortedItems = items.slice(0).map((item, index) => {
             const value = (criterion === null) ? { sort: index } : (item.values.get(criterion) ?? {});
@@ -147,7 +148,7 @@
             sortedItems.sort((a, b) => a.sort - b.sort);
         } else {
             sortedItems.sort((a, b) => b.sort - a.sort);
-        }
+        };
 
         // add the items back and update the value element
         sortedItems.forEach(elem => {
@@ -157,7 +158,7 @@
             const span = elem.li.querySelector('span.sort-value');
             if (span) {
                 span.parentNode.removeChild(span);
-            }
+            };
 
             // make a clone of the value element or create one for spacing
             let valueElem = elem.value;
@@ -167,7 +168,7 @@
                 value.setAttribute('class', 'sort-value');
                 value.appendChild(document.createTextNode(' '));
                 value.appendChild(valueElem.cloneNode(true));
-            }
+            };
 
             // and append the child to it!
             autoSortList.appendChild(elem.li);
@@ -187,7 +188,7 @@
                     a.removeAttribute('aria-current');
                     a.setAttribute('data-sort-stage', '0');
                     return;
-                }
+                };
 
                 a.classList.add('active');
                 a.setAttribute('aria-current', 'true');
@@ -200,11 +201,11 @@
                 } else {
                     info.appendChild(document.createTextNode('-'));
                     info.setAttribute('aria-description', decreasingText);
-                }
+                };
 
                 a.appendChild(info);
-            })
-    }
+            });
+    };
 
     autoSortUI.innerHTML = '';
 
@@ -223,7 +224,7 @@
             a.setAttribute('data-sort-stage', '0');
 
             // add the text node thing
-            a.appendChild(document.createTextNode(criterion))
+            a.appendChild(document.createTextNode(criterion));
             a.addEventListener('click', (evt) => {
                 evt.preventDefault(true);
 
@@ -237,7 +238,7 @@
                 } else {
                     a.setAttribute('data-sort-stage', '0');
                     doSort(null, true);
-                }
+                };
             });
 
             p.appendChild(a);
