@@ -124,11 +124,11 @@
                   "in": "query",
                   "name": "days",
                   "example": 28,
-                  "default": 28,
-                  "minimum": 1,
-                  "maximum": 365,
                   "schema": {
-                     "type": "integer"
+                     "type": "integer",
+                     "minimum": 1,
+                     "maximum": 365,
+                     "default": 28
                   },
                   "required": false,
                   "description": "Maximal number of days to check for a menu"
@@ -523,9 +523,57 @@
                }
             }
          },
+         "Additive": {
+            "type": "string",
+            "description": "An additive of an item. The numbers mean:\n\n* `1` - contains colour additives\n* `2` - contains caffeine\n* `4` - contains preservatives\n* `5` - contains sweeteners\n* `7` - contains antioxidant\n* `8` - contains flavour enhancers\n* `9` - sulphurated\n* `10` - blackened\n* `11` - waxed\n* `12` - contains phosphate\n* `13` - contains sweeteners = contains a source of phenylalanine\n* `30` - compound coating\n",
+            "enum": [
+               "1",
+               "2",
+               "4",
+               "5",
+               "7",
+               "8",
+               "9",
+               "10",
+               "11",
+               "12",
+               "13",
+               "30"
+           ]
+         },
+         "Allergen": {
+            "type": "string",
+            "description": "An allergen of an item. The abbreviations mean:\n\n* `Wz` - cereals containing gluten wheat (spelt, kamut)\n* `Ro` - cereals containing gluten rye\n* `Ge` - cereals containing gluten barley\n* `Hf` - cereals containing gluten oats\n* `Kr` - contains crustaceans\n* `Ei` - eggs\n* `Fi` - fish\n* `Er` - peanuts\n* `So` - soybeans\n* `Mi` - milk/lactose\n* `Man` - almonds\n* `Hs` - hazelnuts\n* `Wa` - walnuts\n* `Ka` - cashew nuts\n* `Pe` - pecan nuts\n* `Pa` - brazil nuts\n* `Pi` - pistachios\n* `Mac` - macadamia nuts\n* `Sel` - celeriac\n* `Sen` - mustard\n* `Ses` - sesame\n* `Su` - sulphur dioxide and sulphites\n* `Lu` - lupines\n* `We` - mollusca\n",
+            "enum": [
+               "Wz",
+               "Ro",
+               "Ge",
+               "Hf",
+               "Kr",
+               "Ei",
+               "Fi",
+               "Er",
+               "So",
+               "Mi",
+               "Man",
+               "Hs",
+               "Wa",
+               "Ka",
+               "Pe",
+               "Pa",
+               "Pi",
+               "Mac",
+               "Sel",
+               "Sen",
+               "Ses",
+               "Su",
+               "Lu",
+               "We"
+            ]
+         },
          "Ingredient": {
             "type": "string",
-            "description": "An ingredient of the item. The abbreviations mean:\n\n * `S` - Pork\n * `R` - Beef\n * `G` - Poultry\n * `L` - Lamb\n * `W` - Game\n * `F` - Fish\n * `V` - Vegetarian\n * `veg` - Vegan\n * `Bio` - organic (certified by DE-ÖKO-006)\n * `MSC` - sustainable fish (certified by MSC - C - 51840)\n * `A` - with alcohol\n * `Gf` - Gluten Free\n * `MV` - Mensa Vital\n * `CO2` - CO2 Neutral\n",
+            "description": "An ingredient of an item. The abbreviations mean:\n\n * `S` - Pork\n * `R` - Beef\n * `G` - Poultry\n * `L` - Lamb\n * `W` - Game\n * `F` - Fish\n * `V` - Vegetarian\n * `veg` - Vegan\n * `Bio` - organic (certified by DE-ÖKO-006)\n * `MSC` - sustainable fish (certified by MSC - C - 51840)\n * `A` - with alcohol\n * `Gf` - Gluten Free\n * `MV` - Mensa Vital\n * `CO2` - CO2 Neutral\n",
             "enum": [
                "S",
                "R",
