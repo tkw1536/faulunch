@@ -99,6 +99,10 @@ func fixAnnotTypos(annots []string) []string {
 			fix = append(fix, "Ei")
 		case "Mi7":
 			fix = append(fix, "Mi", "7")
+		case "Sel1":
+			fix = append(fix, "Sel", "1")
+		case "RWz":
+			fix = append(fix, "R", "Wz")
 		case "Sul": // Not sure about this one
 			fix = append(fix, "Su")
 		case "VWz":
