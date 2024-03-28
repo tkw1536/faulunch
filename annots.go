@@ -14,23 +14,27 @@ var annotationPattern = regexp.MustCompile(`\([^)\s]+\)`)
 func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
 	additives := make(map[Additive]struct{})
 	allergens := make(map[Allergen]struct{})
-	ingredents := make(map[Ingredient]struct{})
+	ingredients := make(map[Ingredient]struct{}, len(item.Piktogramme.Data()))
 
-	item.HTMLTitleDE = item.renderAnnotations(logger, item.TitleDE, false, additives, allergens, ingredents)
-	item.HTMLTitleEN = item.renderAnnotations(logger, item.TitleEN, true, additives, allergens, ingredents)
+	for _, ing := range item.Piktogramme.Data() {
+		ingredients[ing] = struct{}{}
+	}
 
-	item.HTMLDescriptionDE = item.renderAnnotations(logger, item.DescriptionDE, false, additives, allergens, ingredents)
-	item.HTMLDescriptionEN = item.renderAnnotations(logger, item.DescriptionEN, true, additives, allergens, ingredents)
+	item.HTMLTitleDE = item.renderAnnotations(logger, item.TitleDE, false, additives, allergens, ingredients)
+	item.HTMLTitleEN = item.renderAnnotations(logger, item.TitleEN, true, additives, allergens, ingredients)
 
-	item.HTMLBeilagenDE = item.renderAnnotations(logger, item.BeilagenDE, false, additives, allergens, ingredents)
-	item.HTMLBeilagenEN = item.renderAnnotations(logger, item.BeilagenEN, true, additives, allergens, ingredents)
+	item.HTMLDescriptionDE = item.renderAnnotations(logger, item.DescriptionDE, false, additives, allergens, ingredients)
+	item.HTMLDescriptionEN = item.renderAnnotations(logger, item.DescriptionEN, true, additives, allergens, ingredients)
+
+	item.HTMLBeilagenDE = item.renderAnnotations(logger, item.BeilagenDE, false, additives, allergens, ingredients)
+	item.HTMLBeilagenEN = item.renderAnnotations(logger, item.BeilagenEN, true, additives, allergens, ingredients)
 
 	// store all the additive and ingredient data
 	// then sort it for convenience
 
 	internal.SetJSONData(&item.AdditiveAnnotations, internal.SortedKeysOf(additives, func(a, b Additive) int { return a.Cmp(b) }))
 	internal.SetJSONData(&item.AllergenAnnotations, internal.SortedKeysOf(allergens, func(a, b Allergen) int { return a.Cmp(b) }))
-	internal.SetJSONData(&item.IngredientAnnotations, internal.SortedKeysOf(ingredents, func(a, b Ingredient) int { return a.Cmp(b) }))
+	internal.SetJSONData(&item.IngredientAnnotations, internal.SortedKeysOf(ingredients, func(a, b Ingredient) int { return a.Cmp(b) }))
 }
 
 // RenderAnnotations renders annotations in the provided text

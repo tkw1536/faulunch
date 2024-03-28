@@ -499,7 +499,7 @@
                   "items": {
                      "$ref": "#/components/schemas/Ingredient"
                   },
-                  "description": "Ingredients found in description."
+                  "description": "Ingredients found in item description or pictogram field."
                }
             }
          },

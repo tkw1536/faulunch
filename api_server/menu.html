@@ -335,14 +335,14 @@
                 </thead>
                 <tbody>
                     {{ range .Ingredients }}
-                    <tr id="ing-{{.}}">
-                        <td>
-                            {{ . }}
-                        </td>
-                        <td>
-                            {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
-                        </td>
-                    </tr>
+                        <tr id="ing-{{.}}">
+                            <td>
+                                {{ . }}
+                            </td>
+                            <td>
+                                {{ if $english }}{{ .ENString }}{{ else }}{{ .DEString }}{{ end }}
+                            </td>
+                        </tr>
                     {{ end }}
                 </tbody>
             </table>
