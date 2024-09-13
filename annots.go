@@ -7,6 +7,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/tkw1536/faulunch/internal"
+	"github.com/tkw1536/faulunch/internal/fmap"
 )
 
 var annotationPattern = regexp.MustCompile(`\([^)\s]+\)`)
@@ -500,8 +501,8 @@ func (i Ingredient) DEDef() template.HTML {
 	return template.HTML("<a class='annot' href='#ing-" + string(i) + "' title='" + i.DEString() + "'>" + i.DEString() + "</a>")
 }
 
-func order[T ~string](values ...T) internal.FMap[T, int] {
-	m := make(internal.FMap[T, int], len(values))
+func order[T ~string](values ...T) fmap.FMap[T, int] {
+	m := make(fmap.FMap[T, int], len(values))
 	for index, item := range values {
 		m.Add(item, index)
 	}
