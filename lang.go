@@ -1,3 +1,4 @@
+//spellchecker:words faulunch
 package faulunch
 
 // Language represents a language

@@ -1,5 +1,7 @@
+//spellchecker:words faulunch
 package faulunch
 
+//spellchecker:words html template strconv strings github zerolog gorm datatypes
 import (
 	"html/template"
 	"strconv"

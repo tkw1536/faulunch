@@ -1,5 +1,7 @@
+//spellchecker:words faulunch
 package faulunch
 
+//spellchecker:words encoding json http strconv github swaggest swgui embed
 import (
 	"encoding/json"
 	"net/http"

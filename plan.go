@@ -1,5 +1,7 @@
+//spellchecker:words faulunch
 package faulunch
 
+//spellchecker:words encoding strconv strings github zerolog faulunch internal
 import (
 	"encoding/xml"
 	"strconv"

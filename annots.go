@@ -1,5 +1,7 @@
+//spellchecker:words faulunch
 package faulunch
 
+//spellchecker:words html template regexp strings github zerolog faulunch internal fmap
 import (
 	"html/template"
 	"regexp"

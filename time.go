@@ -1,5 +1,7 @@
+//spellchecker:words faulunch
 package faulunch
 
+//spellchecker:words database driver html template strconv time gorm schema tzdata
 import (
 	"database/sql/driver"
 	"fmt"

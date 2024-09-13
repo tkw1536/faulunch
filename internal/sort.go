@@ -1,5 +1,7 @@
+//spellchecker:words internal
 package internal
 
+//spellchecker:words slices
 import "slices"
 
 func SortedKeysOf[K comparable, V any](m map[K]V, sort func(a, b K) int) []K {

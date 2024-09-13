@@ -1,5 +1,7 @@
+//spellchecker:words faulunch
 package faulunch
 
+//spellchecker:words encoding errors http time github zerolog gorm
 import (
 	"encoding/xml"
 	"errors"

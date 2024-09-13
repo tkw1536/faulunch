@@ -1,5 +1,7 @@
+//spellchecker:words main
 package main
 
+//spellchecker:words flag http regexp strings time github glebarez sqlite zerolog tdewolff minify html faulunch gorm
 import (
 	"flag"
 	"net/http"

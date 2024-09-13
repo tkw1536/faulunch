@@ -1,5 +1,7 @@
+//spellchecker:words faulunch
 package faulunch
 
+//spellchecker:words embed html template http regexp strings sync time github zerolog faulunch internal golang text language
 import (
 	"embed"
 	"html/template"

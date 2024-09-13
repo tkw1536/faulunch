@@ -1,5 +1,7 @@
+//spellchecker:words internal
 package internal
 
+//spellchecker:words encoding json gorm datatypes
 import (
 	"encoding/json"
 

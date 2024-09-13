@@ -1,5 +1,7 @@
+//spellchecker:words faulunch
 package faulunch
 
+//spellchecker:words errors time gorm
 import (
 	"errors"
 	"time"

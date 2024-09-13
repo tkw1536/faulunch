@@ -1,5 +1,7 @@
+//spellchecker:words main
 package main
 
+//spellchecker:words time github glebarez sqlite zerolog faulunch gorm
 import (
 	"os"
 	"time"

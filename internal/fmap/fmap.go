@@ -1,5 +1,7 @@
+//spellchecker:words fmap
 package fmap
 
+//spellchecker:words strings
 import "strings"
 
 // FMap represents a map that identifies keys via unicode case-folding.

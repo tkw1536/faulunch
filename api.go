@@ -1,5 +1,7 @@
+//spellchecker:words faulunch
 package faulunch
 
+//spellchecker:words errors slices gorm
 import (
 	"errors"
 
