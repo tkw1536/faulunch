@@ -6,6 +6,7 @@ import (
 	"embed"
 	"html/template"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -18,7 +19,16 @@ import (
 
 //go:embed "api_server"
 var apiServerData embed.FS
-var apiServerTemplate = template.Must(template.ParseFS(apiServerData, "api_server/*.html", "api_server/index.js", "api_server/index.css"))
+var apiServerTemplate = template.Must(template.New("").Funcs(template.FuncMap{
+	"static_css": func(path string) (template.CSS, error) {
+		content, err := apiServerData.ReadFile(filepath.Join("api_server", "static", path+".css"))
+		return template.CSS(content), err
+	},
+	"static_js": func(path string) (template.JS, error) {
+		content, err := apiServerData.ReadFile(filepath.Join("api_server", "static", path+".js"))
+		return template.JS(content), err
+	},
+}).ParseFS(apiServerData, "api_server/*.html"))
 
 type Server struct {
 	Logger *zerolog.Logger
