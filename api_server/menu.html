@@ -69,7 +69,7 @@
             {{ range .Items }}
                 <li>
                     <a href="#{{ $annotate.ID .Category }}">{{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}</a>
-                    {{ if .GlutenFree }}<span class="badge">{{ if $english }}Gluten-Free{{else}}Gluten-Frei{{end}}</span>{{ end }}
+                    {{ if .GlutenFree }}<span class="badge">{{ if $english }}Gluten-Free{{else}}Glutenfrei{{end}}</span>{{ end }}
                 </li>
             {{ end }}
         </ul>
@@ -79,7 +79,7 @@
         <section id="{{ $annotate.ID .Category }}">
             <h3>
                 {{if $english }}{{ .CategoryEN }}{{ else }}{{ .Category }}{{ end }}
-                {{ if .GlutenFree }}<span class="badge">{{ if $english }}Gluten-Free{{else}}Gluten-Frei{{end}}</span>{{ end }}
+                {{ if .GlutenFree }}<span class="badge">{{ if $english }}Gluten-Free{{else}}Glutenfrei{{end}}</span>{{ end }}
             </h3>
             {{ if $english }}
                 {{ if .TitleEN }}
