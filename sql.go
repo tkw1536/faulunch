@@ -4,6 +4,7 @@ package faulunch
 //spellchecker:words html template strconv strings github zerolog gorm datatypes
 import (
 	"html/template"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -45,6 +46,8 @@ type MenuItem struct {
 	Eiweiss       LFloat
 	Salz          LFloat
 
+	GlutenFree bool // is this gluten free?
+
 	// Annotations properly replaced with <span class='#type'> and inside <sup>s
 	HTMLTitleDE       template.HTML
 	HTMLTitleEN       template.HTML
@@ -72,6 +75,7 @@ var categoryTranslations = map[string]string{
 func (m *MenuItem) UpdateComputedFields(logger *zerolog.Logger) {
 	m.translateCategoryNames(logger)
 	m.extractAnnotations(logger)
+	m.extractGlutenFree(logger)
 }
 
 func (m *MenuItem) translateCategoryNames(logger *zerolog.Logger) {
@@ -91,6 +95,10 @@ func (m *MenuItem) translateCategoryNames(logger *zerolog.Logger) {
 	}
 
 	m.CategoryEN = strings.Join(fields, " ")
+}
+
+func (m *MenuItem) extractGlutenFree(logger *zerolog.Logger) {
+	m.GlutenFree = !slices.Contains(m.AllergenAnnotations.Data(), Wheat)
 }
 
 func isOnlyDigits(value string) bool {

@@ -160,3 +160,10 @@ h6:hover .autolink {
 .autosort-ui summary {
     font-size: small;
 }
+
+.badge {
+    font-size: 50%;
+    padding: 0.2em;
+    background-color: var(--definition);
+    border-radius: 0.2em;
+}

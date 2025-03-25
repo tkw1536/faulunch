@@ -321,6 +321,7 @@
                "Eiweiss",
                "Fett",
                "Gesfett",
+               "GlutenFree",
                "HTMLBeilagenDE",
                "HTMLBeilagenEN",
                "HTMLDescriptionDE",
@@ -425,6 +426,10 @@
                   "format": "float",
                   "description": "amount of saturated fatty acids in grams",
                   "example": 23.6
+               },
+               "GlutenFree": {
+                  "type": "boolean",
+                  "description": "is the menu item gluten free"
                },
                "Kh": {
                   "type": "number",
