@@ -4,7 +4,6 @@ package faulunch
 //spellchecker:words html template strconv strings github zerolog gorm datatypes
 import (
 	"html/template"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -98,7 +97,16 @@ func (m *MenuItem) translateCategoryNames(logger *zerolog.Logger) {
 }
 
 func (m *MenuItem) extractGlutenFree(logger *zerolog.Logger) {
-	m.GlutenFree = !slices.Contains(m.AllergenAnnotations.Data(), Wheat)
+	m.GlutenFree = m.isGlutenFree()
+}
+
+func (m MenuItem) isGlutenFree() bool {
+	for _, allergen := range m.AllergenAnnotations.Data() {
+		if allergen == Wheat || allergen == Rye || allergen == Barley || allergen == Oats {
+			return false
+		}
+	}
+	return true
 }
 
 func isOnlyDigits(value string) bool {
