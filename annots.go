@@ -392,6 +392,7 @@ func (menu *MenuItem) parseIngredients(s string, logger *zerolog.Logger) []Ingre
 	ingredients := make(map[Ingredient]struct{})
 	for _, match := range pictogramRegexp.FindAllStringSubmatch(s, -1) {
 		ing := Ingredient(match[1])
+		ing.normalize()
 		if !ing.Known() {
 			logger.Error().Str("ingredient", match[1]).Time("day", menu.Day.Time()).Str("location", string(menu.Location)).Msg("Unknown Ingredient")
 			continue
@@ -416,12 +417,19 @@ const (
 	Vegan      Ingredient = "veg"
 	MensaVital Ingredient = "MV"
 	Organic    Ingredient = "Bio"
+	organicAlt Ingredient = "B" // alternate (newer) variant for Organic
 	FishMSC    Ingredient = "MSC"
 
 	Alcohol    Ingredient = "A"
 	Glutenfree Ingredient = "Gf"
 	CO2Neutral Ingredient = "CO2"
 )
+
+func (i *Ingredient) normalize() {
+	if *i == organicAlt {
+		*i = Organic
+	}
+}
 
 var ingredientOrder = order(
 	Vegetarian,
