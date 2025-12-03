@@ -26,9 +26,12 @@ func (location *Location) MarshalJSON() ([]byte, error) {
 const (
 	CafeteriaBaerenschanzstr Location = "cafeteria-baerenschanzstr"
 	CafeteriaBingstr         Location = "cafeteria-bingstr"
+	CafeteriaChemikum        Location = "cafeteria-chemikum"
+	CafeteriaNeuburg         Location = "cafeteria-neuburg"
 	CafeteriaComeIn          Location = "cafeteria-come-in"
 	CafeteriaKochstr         Location = "cafeteria-kochstr"
 	CafeteriaSuedblick       Location = "cafeteria-suedblick"
+	CafeteriaUnibibliothek   Location = "cafeteria-ub"
 	CafeteriaVeilhofstr      Location = "cafeteria-veilhofstr"
 	CafeteriaWiso            Location = "cafeteria-wiso"
 	MensaAnsbach             Location = "mensa-ansbach"
@@ -38,6 +41,7 @@ const (
 	MensaLmp                 Location = "mensa-lmp"
 	MensaRegensburgerstr     Location = "mensa-regensburgerstr"
 	MensaSued                Location = "mensa-sued"
+	MensaOic                 Location = "oic"
 	MensateriaOhm            Location = "mensateria-ohm"
 	MensateriaStPaul         Location = "mensateria-st-paul"
 	MensateriaTriesdorf      Location = "mensateria-triesdorf"
@@ -79,6 +83,10 @@ var locationIDs = map[Location]int{
 	CafeteriaSuedblick:       21,
 	WohnanlageStPeter:        20,
 	CafeteriaWiso:            25,
+	CafeteriaChemikum:        22,
+	CafeteriaNeuburg:         26,
+	CafeteriaUnibibliothek:   27,
+	MensaOic:                 28,
 }
 
 type LocationDescription struct {
@@ -349,6 +357,42 @@ var locationDescriptions = map[Location]LocationDescription{
 		Internal: true,
 
 		// not sure which one this is
+	},
+	CafeteriaChemikum: {
+		Name: "Cafeteria Chemikum",
+		Cafe: true,
+
+		Street:   "Nikolaus-Fiebiger Straße",
+		StreetNo: "10",
+		ZIP:      "91058",
+		City:     "Erlangen",
+	},
+	CafeteriaNeuburg: {
+		Name: "Mittagstheke Neuburg an der Donau",
+		Cafe: true,
+
+		Street:   "An der Hochschule",
+		StreetNo: "1",
+		ZIP:      "86633",
+		City:     "Neuburg an der Donau",
+	},
+	CafeteriaUnibibliothek: {
+		Name: "Universitätsbibliothek Erlangen",
+		Cafe: true,
+
+		Street:   "Universitätsstraße",
+		StreetNo: "4",
+		ZIP:      "91054",
+		City:     "Erlangen",
+	},
+	MensaOic: {
+		Name:      "Mensateria OIC Nürnberg",
+		Refactory: true,
+
+		Street:   "Brucknerstraße",
+		StreetNo: "11",
+		ZIP:      "90429",
+		City:     "Nürnberg",
 	},
 }
 
