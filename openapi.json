@@ -431,6 +431,17 @@
                   "type": "boolean",
                   "description": "is the menu item gluten free"
                },
+               "DietaryCategory": {
+                  "type": "string",
+                  "description": "the dietary category of the menu item",
+                  "example": "meat",
+                  "enum": [
+                     "meat",
+                     "fish",
+                     "vegetarian",
+                     "vegan"
+                  ]
+               },
                "Kh": {
                   "type": "number",
                   "format": "float",

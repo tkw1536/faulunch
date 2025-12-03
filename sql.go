@@ -45,7 +45,8 @@ type MenuItem struct {
 	Eiweiss       LFloat
 	Salz          LFloat
 
-	GlutenFree bool // is this gluten free?
+	GlutenFree      bool            // is this gluten free?
+	DietaryCategory DietaryCategory // the dietary category of this item
 
 	// Annotations properly replaced with <span class='#type'> and inside <sup>s
 	HTMLTitleDE       template.HTML
@@ -74,7 +75,8 @@ var categoryTranslations = map[string]string{
 func (m *MenuItem) UpdateComputedFields(logger *zerolog.Logger) {
 	m.translateCategoryNames(logger)
 	m.extractAnnotations(logger)
-	m.extractGlutenFree(logger)
+	m.extractGlutenFree()
+	m.extractDietaryCategory()
 }
 
 func (m *MenuItem) translateCategoryNames(logger *zerolog.Logger) {
@@ -96,8 +98,12 @@ func (m *MenuItem) translateCategoryNames(logger *zerolog.Logger) {
 	m.CategoryEN = strings.Join(fields, " ")
 }
 
-func (m *MenuItem) extractGlutenFree(logger *zerolog.Logger) {
+func (m *MenuItem) extractGlutenFree() {
 	m.GlutenFree = m.isGlutenFree()
+}
+
+func (m *MenuItem) extractDietaryCategory() {
+	m.DietaryCategory = m.getDietaryCategory()
 }
 
 func (m MenuItem) isGlutenFree() bool {
