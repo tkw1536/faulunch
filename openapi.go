@@ -25,6 +25,7 @@ func (server *Server) registerAPIRoutes() {
 	})
 
 	// api endpoints
+	server.mux.HandleFunc("GET /api/v1/healthcheck", server.handleAPIHealth)
 	server.mux.HandleFunc("GET /api/v1/sync", server.handleAPISync)
 	server.mux.HandleFunc("GET /api/v1/locations", server.handleAPILocations)
 	server.mux.HandleFunc("GET /api/v1/menu/{location}", server.handleAPIMenuDays)
@@ -42,6 +43,7 @@ func (server *Server) handleNotFound(w http.ResponseWriter) {
 
 const (
 	internalServerError = `{"status":"Internal Server Error"}`
+	statusHealthy       = `{"status":"healthy"}`
 )
 
 // handleInternalServerError sends an internal server error
@@ -49,6 +51,20 @@ func (server *Server) handleInternalServerError(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(internalServerError))
+}
+
+func (server *Server) handleAPIHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	db, err := server.API.DB.DB()
+	if err != nil || db.PingContext(r.Context()) != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(internalServerError))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(statusHealthy))
 }
 
 func (server *Server) handleAPISync(w http.ResponseWriter, r *http.Request) {

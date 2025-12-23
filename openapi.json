@@ -19,13 +19,48 @@
          "name": "menu",
          "description": "Access menus"
       },
-      {
-         "name": "sync",
-         "description": "Access meta information about synchronization"
+{
+      "name": "sync",
+      "description": "Access meta information about synchronization"
+   },
+   {
+      "name": "health",
+      "description": "Health check endpoints"
+   }
+],
+"paths": {
+   "/healthcheck": {
+      "get": {
+         "tags": [
+            "health"
+         ],
+         "summary": "Check if the API is healthy",
+         "description": "Returns a healthy status if the database connection is active, otherwise returns an internal server error.",
+         "responses": {
+            "200": {
+               "description": "API is healthy",
+               "content": {
+                  "application/json": {
+                     "schema": {
+                        "$ref": "#/components/schemas/HealthyStatus"
+                     }
+                  }
+               }
+            },
+            "500": {
+               "description": "API is unhealthy",
+               "content": {
+                  "application/json": {
+                     "schema": {
+                        "$ref": "#/components/schemas/InternalServerError"
+                     }
+                  }
+               }
+            }
+         }
       }
-   ],
-   "paths": {
-      "/sync": {
+   },
+   "/sync": {
          "get": {
             "tags": [
                "sync"
@@ -607,6 +642,21 @@
                "MV",
                "CO2"
             ]
+         },
+         "HealthyStatus": {
+            "type": "object",
+            "description": "A status indicating that the API is healthy",
+            "required": [
+               "status"
+            ],
+            "properties": {
+               "status": {
+                  "type": "string",
+                  "enum": [
+                     "healthy"
+                  ]
+               }
+            }
          },
          "InternalServerError": {
             "type": "object",
