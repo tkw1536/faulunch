@@ -237,7 +237,7 @@ type menuContext struct {
 
 	Allergens   []annotations.Allergen
 	Additives   []annotations.Additive
-	Ingredients []Ingredient
+	Ingredients []annotations.Ingredient
 }
 
 func (mc menuContext) ID(id string) string {
@@ -311,7 +311,7 @@ func (server *Server) HandleMenu(location Location, day ltime.Day, english bool,
 	// merge all the annotations
 	additivesSet := make(map[annotations.Additive]struct{})
 	allergensSet := make(map[annotations.Allergen]struct{})
-	ingredientsSet := make(map[Ingredient]struct{})
+	ingredientsSet := make(map[annotations.Ingredient]struct{})
 
 	for _, i := range mc.Items {
 		for _, add := range i.AdditiveAnnotations.Data() {
@@ -327,7 +327,7 @@ func (server *Server) HandleMenu(location Location, day ltime.Day, english bool,
 
 	mc.Additives = internal.SortedKeysOf(additivesSet, func(a, b annotations.Additive) int { return a.Cmp(b) })
 	mc.Allergens = internal.SortedKeysOf(allergensSet, func(a, b annotations.Allergen) int { return a.Cmp(b) })
-	mc.Ingredients = internal.SortedKeysOf(ingredientsSet, func(a, b Ingredient) int { return a.Cmp(b) })
+	mc.Ingredients = internal.SortedKeysOf(ingredientsSet, func(a, b annotations.Ingredient) int { return a.Cmp(b) })
 
 	// and execute the template
 	{

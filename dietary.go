@@ -7,14 +7,14 @@ func (m *MenuItem) getDietaryCategory() DietaryCategory {
 
 	// vegan
 	for _, ing := range ingredients {
-		if ing == Vegan {
+		if ing == annotations.Vegan {
 			return DietaryCategoryVegan
 		}
 	}
 
 	// vegetarian
 	for _, ing := range ingredients {
-		if ing == Vegetarian {
+		if ing == annotations.Vegetarian {
 			return DietaryCategoryVegetarian
 		}
 	}
@@ -22,7 +22,7 @@ func (m *MenuItem) getDietaryCategory() DietaryCategory {
 	// check if we have fish
 	hasFish := false
 	for _, ing := range ingredients {
-		if ing == FishI {
+		if ing == annotations.FishI {
 			hasFish = true
 			break
 		}

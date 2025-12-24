@@ -36,7 +36,7 @@ type MenuItem struct {
 	Preis2 types.LPrice // price (employee)
 	Preis3 types.LPrice // price (guest)
 
-	Piktogramme   datatypes.JSONType[[]Ingredient]
+	Piktogramme   datatypes.JSONType[[]annotations.Ingredient]
 	Kj            types.LFloat
 	Kcal          types.LFloat
 	Fett          types.LFloat
@@ -60,7 +60,7 @@ type MenuItem struct {
 
 	AllergenAnnotations   datatypes.JSONType[[]annotations.Allergen]
 	AdditiveAnnotations   datatypes.JSONType[[]annotations.Additive]
-	IngredientAnnotations datatypes.JSONType[[]Ingredient]
+	IngredientAnnotations datatypes.JSONType[[]annotations.Ingredient]
 }
 
 var categoryTranslations = map[string]string{
@@ -126,7 +126,7 @@ func isOnlyDigits(value string) bool {
 	return true
 }
 
-func (m MenuItem) Ingredients() []Ingredient {
+func (m MenuItem) Ingredients() []annotations.Ingredient {
 	return m.Piktogramme.Data()
 }
 
