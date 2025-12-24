@@ -4,10 +4,10 @@ package faulunch
 //spellchecker:words html template strconv strings github zerolog gorm datatypes
 import (
 	"html/template"
-	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog"
+	"github.com/tkw1536/faulunch/internal/types"
 	"gorm.io/datatypes"
 )
 
@@ -30,20 +30,20 @@ type MenuItem struct {
 	BeilagenDE string // sides (de)
 	BeilagenEN string // sides (en)
 
-	Preis1 LPrice // price (student)
-	Preis2 LPrice // price (employee)
-	Preis3 LPrice // price (guest)
+	Preis1 types.LPrice // price (student)
+	Preis2 types.LPrice // price (employee)
+	Preis3 types.LPrice // price (guest)
 
 	Piktogramme   datatypes.JSONType[[]Ingredient]
-	Kj            LFloat
-	Kcal          LFloat
-	Fett          LFloat
-	Gesfett       LFloat
-	Kh            LFloat
-	Zucker        LFloat
-	Ballaststoffe LFloat
-	Eiweiss       LFloat
-	Salz          LFloat
+	Kj            types.LFloat
+	Kcal          types.LFloat
+	Fett          types.LFloat
+	Gesfett       types.LFloat
+	Kh            types.LFloat
+	Zucker        types.LFloat
+	Ballaststoffe types.LFloat
+	Eiweiss       types.LFloat
+	Salz          types.LFloat
 
 	GlutenFree      bool            // is this gluten free?
 	DietaryCategory DietaryCategory // the dietary category of this item
@@ -148,25 +148,4 @@ func (m MenuItem) Cmp(other MenuItem) int {
 		return 1
 	}
 	return strings.Compare(m.Category, other.Category)
-}
-
-type LPrice float64
-
-func (lp LPrice) DEString() string {
-	return strings.ReplaceAll(lp.ENString(), ".", ",")
-}
-func (lp LPrice) ENString() string {
-	return strconv.FormatFloat(float64(lp), 'f', 2, 64)
-}
-
-// LFloat represents a localized float
-type LFloat float64
-
-func (lf LFloat) DEString() string {
-	return strings.ReplaceAll(lf.ENString(), ".", ",")
-}
-
-func (lf LFloat) ENString() string {
-	value := strconv.FormatFloat(float64(lf), 'f', 5, 64)
-	return strings.TrimSuffix(strings.TrimRight(value, "0"), ".")
 }

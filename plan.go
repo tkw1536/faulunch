@@ -82,21 +82,21 @@ func Merge(logger *zerolog.Logger, german Plan, english Plan) (location Location
 					menu.BeilagenDE = item.Beilagen
 				}
 
-				menu.Preis1 = LPrice(item.Preis1)
-				menu.Preis2 = LPrice(item.Preis2)
-				menu.Preis3 = LPrice(item.Preis3)
+				menu.Preis1 = types.LPrice(item.Preis1)
+				menu.Preis2 = types.LPrice(item.Preis2)
+				menu.Preis3 = types.LPrice(item.Preis3)
 
 				// TODO: Extract Piktogramme
 				internal.SetJSONData(&menu.Piktogramme, menu.parseIngredients(item.Piktogramme, logger))
-				menu.Kj = LFloat(item.Kj)
-				menu.Kcal = LFloat(item.Kcal)
-				menu.Fett = LFloat(item.Fett)
-				menu.Gesfett = LFloat(item.Gesfett)
-				menu.Kh = LFloat(item.Kh)
-				menu.Zucker = LFloat(item.Zucker)
-				menu.Ballaststoffe = LFloat(item.Ballaststoffe)
-				menu.Eiweiss = LFloat(item.Eiweiss)
-				menu.Salz = LFloat(item.Salz)
+				menu.Kj = types.LFloat(item.Kj)
+				menu.Kcal = types.LFloat(item.Kcal)
+				menu.Fett = types.LFloat(item.Fett)
+				menu.Gesfett = types.LFloat(item.Gesfett)
+				menu.Kh = types.LFloat(item.Kh)
+				menu.Zucker = types.LFloat(item.Zucker)
+				menu.Ballaststoffe = types.LFloat(item.Ballaststoffe)
+				menu.Eiweiss = types.LFloat(item.Eiweiss)
+				menu.Salz = types.LFloat(item.Salz)
 
 				catMap[item.Category] = menu
 			}
