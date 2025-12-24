@@ -4,11 +4,10 @@ package faulunch
 //spellchecker:words encoding strconv strings github zerolog faulunch internal
 import (
 	"encoding/xml"
-	"strconv"
-	"strings"
 
 	"github.com/rs/zerolog"
 	"github.com/tkw1536/faulunch/internal"
+	"github.com/tkw1536/faulunch/internal/types"
 )
 
 type Plan struct {
@@ -23,22 +22,22 @@ type Plan struct {
 			Description string `xml:"description"`
 			Beilagen    string `xml:"beilagen"`
 
-			Preis1 SmartFloat64 `xml:"preis1"`
-			Preis2 SmartFloat64 `xml:"preis2"`
-			Preis3 SmartFloat64 `xml:"preis3"`
+			Preis1 types.SmartFloat64 `xml:"preis1"`
+			Preis2 types.SmartFloat64 `xml:"preis2"`
+			Preis3 types.SmartFloat64 `xml:"preis3"`
 
-			Einheit       string       `xml:"einheit"`
-			Piktogramme   string       `xml:"piktogramme"`
-			Kj            SmartFloat64 `xml:"kj"`
-			Kcal          SmartFloat64 `xml:"kcal"`
-			Fett          SmartFloat64 `xml:"fett"`
-			Gesfett       SmartFloat64 `xml:"gesfett"`
-			Kh            SmartFloat64 `xml:"kh"`
-			Zucker        SmartFloat64 `xml:"zucker"`
-			Ballaststoffe SmartFloat64 `xml:"ballaststoffe"`
-			Eiweiss       SmartFloat64 `xml:"eiweiss"`
-			Salz          SmartFloat64 `xml:"salz"`
-			Foto          string       `xml:"foto"`
+			Einheit       string             `xml:"einheit"`
+			Piktogramme   string             `xml:"piktogramme"`
+			Kj            types.SmartFloat64 `xml:"kj"`
+			Kcal          types.SmartFloat64 `xml:"kcal"`
+			Fett          types.SmartFloat64 `xml:"fett"`
+			Gesfett       types.SmartFloat64 `xml:"gesfett"`
+			Kh            types.SmartFloat64 `xml:"kh"`
+			Zucker        types.SmartFloat64 `xml:"zucker"`
+			Ballaststoffe types.SmartFloat64 `xml:"ballaststoffe"`
+			Eiweiss       types.SmartFloat64 `xml:"eiweiss"`
+			Salz          types.SmartFloat64 `xml:"salz"`
+			Foto          string             `xml:"foto"`
 		} `xml:"item"`
 	} `xml:"tag"`
 }
@@ -116,35 +115,4 @@ func Merge(logger *zerolog.Logger, german Plan, english Plan) (location Location
 	}
 
 	return
-}
-
-type SmartFloat64 float64
-
-const (
-	smartComma  = ","
-	smartPeriod = "."
-	smartEmpty  = "-"
-)
-
-func (sf64 *SmartFloat64) UnmarshalText(text []byte) error {
-	value := string(text)
-
-	// if there are only empty values, ignore them
-	if value == "" || value == smartEmpty {
-		*sf64 = 0
-		return nil
-	}
-
-	// replace "," by "." (for german notation)
-	if strings.ContainsAny(value, smartComma) && !strings.ContainsAny(value, smartPeriod) {
-		value = strings.ReplaceAll(value, smartComma, smartPeriod)
-	}
-
-	f64, err := strconv.ParseFloat(value, 64)
-	*sf64 = SmartFloat64(f64)
-	return err
-}
-
-func (sf64 *SmartFloat64) UnmarshalXMLAttr(attr xml.Attr) error {
-	return sf64.UnmarshalText([]byte(attr.Value))
 }
