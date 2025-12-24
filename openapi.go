@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/swaggest/swgui/v5emb"
+	"github.com/tkw1536/faulunch/internal/ltime"
 
 	_ "embed"
 )
@@ -105,9 +106,9 @@ func (server *Server) handleAPIMenuDays(w http.ResponseWriter, r *http.Request) 
 	logger := server.Logger.With().Str("route", "API.MenuDays").Str("location", string(location)).Logger()
 
 	// get the day to start with
-	from := ParseDay(r.URL.Query().Get("from"))
+	from := ltime.ParseDay(r.URL.Query().Get("from"))
 	if from == 0 {
-		from = Today().Add(-21) // default 21 days ago
+		from = ltime.Today().Add(-21) // default 21 days ago
 	}
 
 	count, err := strconv.Atoi(r.URL.Query().Get("days"))
@@ -152,7 +153,7 @@ func (server *Server) handleAPIMenuDays(w http.ResponseWriter, r *http.Request) 
 }
 
 func (server *Server) handleAPIMenu(w http.ResponseWriter, r *http.Request) {
-	day := ParseDay(r.PathValue("day"))
+	day := ltime.ParseDay(r.PathValue("day"))
 	location := Location(r.PathValue("location"))
 
 	logger := server.Logger.With().Str("route", "API.Menu").Str("location", string(location)).Stringer("day", day).Logger()

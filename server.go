@@ -14,6 +14,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/tkw1536/faulunch/internal"
+	"github.com/tkw1536/faulunch/internal/ltime"
 	"golang.org/x/text/language"
 )
 
@@ -123,13 +124,13 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// menu
 
 		server.mux.HandleFunc("GET /en/{location}/{day}", func(w http.ResponseWriter, r *http.Request) {
-			day := ParseDay(r.PathValue("day"))
+			day := ltime.ParseDay(r.PathValue("day"))
 			location := Location(r.PathValue("location"))
 			server.HandleMenu(location, day, true, w, r)
 		})
 
 		server.mux.HandleFunc("GET /de/{location}/{day}", func(w http.ResponseWriter, r *http.Request) {
-			day := ParseDay(r.PathValue("day"))
+			day := ltime.ParseDay(r.PathValue("day"))
 			location := Location(r.PathValue("location"))
 			server.HandleMenu(location, day, false, w, r)
 		})
@@ -228,7 +229,7 @@ func (server *Server) HandleIndex(english bool, w http.ResponseWriter, r *http.R
 type menuContext struct {
 	globalContext
 
-	Day        Day
+	Day        ltime.Day
 	Location   Location
 	Pagination Pagination
 	Items      []MenuItem
@@ -242,7 +243,7 @@ func (mc menuContext) ID(id string) string {
 	return strings.ReplaceAll(id, " ", "-")
 }
 
-func (mc menuContext) Link(d Day) template.HTML {
+func (mc menuContext) Link(d ltime.Day) template.HTML {
 	link := string(mc.Location) + "/" + d.String()
 	var date string
 	if mc.globalContext.English {
@@ -263,7 +264,7 @@ const (
 func (server *Server) HandleLocation(location Location, english bool, w http.ResponseWriter, r *http.Request) {
 	logger := server.Logger.With().Str("route", "HandleLocation").Str("location", string(location)).Logger()
 
-	now, err := server.API.CurrentDay(location, Today())
+	now, err := server.API.CurrentDay(location, ltime.Today())
 	logger.Debug().Err(err).Msg("API.CurrentDay")
 	if err != nil {
 		http.NotFound(w, r)
@@ -272,7 +273,7 @@ func (server *Server) HandleLocation(location Location, english bool, w http.Res
 	server.HandleMenu(location, now, english, w, r)
 }
 
-func (server *Server) HandleMenu(location Location, day Day, english bool, w http.ResponseWriter, r *http.Request) {
+func (server *Server) HandleMenu(location Location, day ltime.Day, english bool, w http.ResponseWriter, r *http.Request) {
 	logger := server.Logger.With().Str("route", "HandleMenu").Str("location", string(location)).Stringer("day", day).Logger()
 
 	mc := menuContext{

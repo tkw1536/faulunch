@@ -7,6 +7,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/tkw1536/faulunch/internal"
+	"github.com/tkw1536/faulunch/internal/ltime"
 	"github.com/tkw1536/faulunch/internal/types"
 )
 
@@ -43,7 +44,7 @@ type Plan struct {
 }
 
 // Merge merges the german and english plan for the given location into a set of menu items, a location, and a timestamp.
-func Merge(logger *zerolog.Logger, german Plan, english Plan) (location Location, timestamps []Day, menu []MenuItem) {
+func Merge(logger *zerolog.Logger, german Plan, english Plan) (location Location, timestamps []ltime.Day, menu []MenuItem) {
 	// extract the location
 	location = LocationOfID(german.Location)
 
@@ -58,7 +59,7 @@ func Merge(logger *zerolog.Logger, german Plan, english Plan) (location Location
 		{english, true},
 	} {
 		for _, day := range daylang.Plan.Days {
-			timestamp := ParseDay(day.Timestamp)
+			timestamp := ltime.ParseDay(day.Timestamp)
 
 			// generate a map of categories
 			catMap := dayCatMap[day.Timestamp]
@@ -106,9 +107,9 @@ func Merge(logger *zerolog.Logger, german Plan, english Plan) (location Location
 	}
 
 	// build the menu and all the timestamps
-	timestamps = make([]Day, 0, len(dayCatMap))
+	timestamps = make([]ltime.Day, 0, len(dayCatMap))
 	for t, catMap := range dayCatMap {
-		timestamps = append(timestamps, ParseDay(t))
+		timestamps = append(timestamps, ltime.ParseDay(t))
 		for _, mitem := range catMap {
 			menu = append(menu, mitem)
 		}

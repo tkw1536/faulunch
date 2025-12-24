@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog"
+	"github.com/tkw1536/faulunch/internal/ltime"
 	"github.com/tkw1536/faulunch/internal/types"
 	"gorm.io/datatypes"
 )
@@ -15,8 +16,8 @@ import (
 type MenuItem struct {
 	ID uint `gorm:"primaryKey" json:"-"`
 
-	Day      Day      `gorm:"index" json:"-"` // the day this item is for
-	Location Location `gorm:"index" json:"-"` // the location this item is for
+	Day      ltime.Day `gorm:"index" json:"-"` // the day this item is for
+	Location Location  `gorm:"index" json:"-"` // the location this item is for
 
 	Category   string `gorm:"index"` // line this item is in
 	CategoryEN string // english translation of category

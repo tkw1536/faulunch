@@ -7,6 +7,7 @@ import (
 
 	"slices"
 
+	"github.com/tkw1536/faulunch/internal/ltime"
 	"gorm.io/gorm"
 )
 
@@ -29,19 +30,19 @@ func (api *API) Locations() (locations []Location, err error) {
 
 // Pagination represents an environment for the
 type Pagination struct {
-	Head []Day
+	Head []ltime.Day
 
-	Prev []Day
-	Now  Day
-	Next []Day
+	Prev []ltime.Day
+	Now  ltime.Day
+	Next []ltime.Day
 
-	Tail []Day
+	Tail []ltime.Day
 }
 
 var errNoCurrent = errors.New("no current item")
 
-func (api *API) CurrentDay(location Location, query Day) (day Day, err error) {
-	var days []Day
+func (api *API) CurrentDay(location Location, query ltime.Day) (day ltime.Day, err error) {
+	var days []ltime.Day
 	res := api.DB.Model(&MenuItem{}).
 		Where("Location = ? AND Day <= ? ", location, query).
 		Distinct("Day").Order("day DESC").
@@ -59,7 +60,7 @@ func (api *API) CurrentDay(location Location, query Day) (day Day, err error) {
 }
 
 // DayPagination builds up day-based pagination for the given query.
-func (api *API) DayPagination(location Location, query Day, size int) (pagination Pagination, err error) {
+func (api *API) DayPagination(location Location, query ltime.Day, size int) (pagination Pagination, err error) {
 	if size < 1 {
 		panic("DayPagination: limit < 1")
 	}
@@ -171,7 +172,7 @@ func (api *API) KnowsLocation(location Location) (exists bool, err error) {
 }
 
 // Days returns the days with an explicit menu starting at day, and including (at most) the next count days.
-func (api *API) Days(location Location, day Day, count int) (days []Day, err error) {
+func (api *API) Days(location Location, day ltime.Day, count int) (days []ltime.Day, err error) {
 	start := day.Normalize()
 	end := day.Add(count)
 
@@ -183,7 +184,7 @@ func (api *API) Days(location Location, day Day, count int) (days []Day, err err
 // MenuItems returns the menu items for the given day and time.
 // They are sorted by category.
 // If it does not exist, an empty menu item is returned.
-func (api *API) MenuItems(location Location, day Day) (items []MenuItem, err error) {
+func (api *API) MenuItems(location Location, day ltime.Day) (items []MenuItem, err error) {
 	res := api.DB.Model(&MenuItem{}).Where("Location = ? AND day = ?", location, day).Order("Category ASC").Find(&items)
 	slices.SortStableFunc(items, func(a, b MenuItem) int { return a.Cmp(b) })
 	err = res.Error

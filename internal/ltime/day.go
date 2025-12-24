@@ -1,5 +1,4 @@
-//spellchecker:words faulunch
-package faulunch
+package ltime
 
 //spellchecker:words database driver html template strconv time gorm schema tzdata
 import (
