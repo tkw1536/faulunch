@@ -235,7 +235,7 @@ type menuContext struct {
 	Pagination Pagination
 	Items      []MenuItem
 
-	Allergens   []Allergen
+	Allergens   []annotations.Allergen
 	Additives   []annotations.Additive
 	Ingredients []Ingredient
 }
@@ -310,7 +310,7 @@ func (server *Server) HandleMenu(location Location, day ltime.Day, english bool,
 
 	// merge all the annotations
 	additivesSet := make(map[annotations.Additive]struct{})
-	allergensSet := make(map[Allergen]struct{})
+	allergensSet := make(map[annotations.Allergen]struct{})
 	ingredientsSet := make(map[Ingredient]struct{})
 
 	for _, i := range mc.Items {
@@ -326,7 +326,7 @@ func (server *Server) HandleMenu(location Location, day ltime.Day, english bool,
 	}
 
 	mc.Additives = internal.SortedKeysOf(additivesSet, func(a, b annotations.Additive) int { return a.Cmp(b) })
-	mc.Allergens = internal.SortedKeysOf(allergensSet, func(a, b Allergen) int { return a.Cmp(b) })
+	mc.Allergens = internal.SortedKeysOf(allergensSet, func(a, b annotations.Allergen) int { return a.Cmp(b) })
 	mc.Ingredients = internal.SortedKeysOf(ingredientsSet, func(a, b Ingredient) int { return a.Cmp(b) })
 
 	// and execute the template

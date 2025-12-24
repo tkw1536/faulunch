@@ -17,7 +17,7 @@ var annotationPattern = regexp.MustCompile(`\([^)\s]+\)`)
 
 func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
 	additives := make(map[annotations.Additive]struct{})
-	allergens := make(map[Allergen]struct{})
+	allergens := make(map[annotations.Allergen]struct{})
 	ingredients := make(map[Ingredient]struct{}, len(item.Piktogramme.Data()))
 
 	for _, ing := range item.Piktogramme.Data() {
@@ -37,12 +37,12 @@ func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
 	// then sort it for convenience
 
 	internal.SetJSONData(&item.AdditiveAnnotations, internal.SortedKeysOf(additives, func(a, b annotations.Additive) int { return a.Cmp(b) }))
-	internal.SetJSONData(&item.AllergenAnnotations, internal.SortedKeysOf(allergens, func(a, b Allergen) int { return a.Cmp(b) }))
+	internal.SetJSONData(&item.AllergenAnnotations, internal.SortedKeysOf(allergens, func(a, b annotations.Allergen) int { return a.Cmp(b) }))
 	internal.SetJSONData(&item.IngredientAnnotations, internal.SortedKeysOf(ingredients, func(a, b Ingredient) int { return a.Cmp(b) }))
 }
 
 // RenderAnnotations renders annotations in the provided text
-func (menu *MenuItem) renderAnnotations(logger *zerolog.Logger, text string, english bool, additives map[annotations.Additive]struct{}, allergens map[Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
+func (menu *MenuItem) renderAnnotations(logger *zerolog.Logger, text string, english bool, additives map[annotations.Additive]struct{}, allergens map[annotations.Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
 	values := annotationPattern.Split(text, -1)
 	for i, v := range values {
 		values[i] = template.HTMLEscapeString(v)
@@ -137,7 +137,7 @@ func fixAnnotTypos(annots []string) []string {
 // validMatches checks if at least one annotation inside the match is valid
 func anyValidAnnot(matches ...string) bool {
 	for _, c := range matches {
-		if annotations.Additive(c).Known() || Allergen(c).Known() || Ingredient(c).Known() {
+		if annotations.Additive(c).Known() || annotations.Allergen(c).Known() || Ingredient(c).Known() {
 			return true
 		}
 	}
@@ -145,7 +145,7 @@ func anyValidAnnot(matches ...string) bool {
 }
 
 // renders and extracts a single annotation
-func (menu *MenuItem) renderAnnot(logger *zerolog.Logger, annot string, english bool, additives map[annotations.Additive]struct{}, allergens map[Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
+func (menu *MenuItem) renderAnnot(logger *zerolog.Logger, annot string, english bool, additives map[annotations.Additive]struct{}, allergens map[annotations.Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
 	{
 		add := annotations.Additive(annot)
 		if add, ok := add.Normalize(); ok {
@@ -160,7 +160,7 @@ func (menu *MenuItem) renderAnnot(logger *zerolog.Logger, annot string, english 
 
 	{
 
-		all := Allergen(annot)
+		all := annotations.Allergen(annot)
 		if all, ok := all.Normalize(); ok {
 			allergens[all] = struct{}{}
 			if english {
@@ -186,122 +186,6 @@ func (menu *MenuItem) renderAnnot(logger *zerolog.Logger, annot string, english 
 	logger.Error().Str("annot", annot).Int("day", int(menu.Day)).Str("location", string(menu.Location)).Bool("english", english).Msg("Unknown annotation")
 
 	return template.HTML(template.HTMLEscapeString(annot))
-}
-
-type Allergen string
-
-func (a Allergen) Cmp(other Allergen) int {
-	return allergenOrder[a] - allergenOrder[other]
-}
-
-func (a Allergen) Known() bool {
-	return allergenOrder.Has(a)
-}
-
-func (a Allergen) Normalize() (Allergen, bool) {
-	key, _, ok := allergenOrder.Get(a)
-	return key, ok
-}
-
-func (a Allergen) ENString() string {
-	return allergensEN[a]
-}
-func (a Allergen) ENHTML() template.HTML {
-	return template.HTML("<a class='annot' href='#all-" + string(a) + "' title='" + a.ENString() + "'>" + string(a) + "</a>")
-}
-
-func (a Allergen) DEString() string {
-	return allergensDE[a]
-}
-func (a Allergen) DEHTML() template.HTML {
-	return template.HTML("<a class='annot' href='#all-" + string(a) + "' title='" + a.DEString() + "'>" + string(a) + "</a>")
-}
-
-const (
-	Wheat         Allergen = "Wz"
-	Rye           Allergen = "Ro"
-	Barley        Allergen = "Ge"
-	Oats          Allergen = "Hf"
-	Crustaceans   Allergen = "Kr"
-	Eggs          Allergen = "Ei"
-	Fish          Allergen = "Fi"
-	Peanuts       Allergen = "Er"
-	Soybeans      Allergen = "So"
-	Milk          Allergen = "Mi"
-	Almonds       Allergen = "Man"
-	HazelNuts     Allergen = "Hs"
-	WalNuts       Allergen = "Wa"
-	CashewNuts    Allergen = "Ka"
-	PecanNuts     Allergen = "Pe"
-	BrazilNuts    Allergen = "Pa"
-	Pistachios    Allergen = "Pi"
-	MacadamiaNuts Allergen = "Mac"
-	Celeriac      Allergen = "Sel"
-	Mustard       Allergen = "Sen"
-	Sesame        Allergen = "Ses"
-	Sulphur       Allergen = "Su"
-	Lupines       Allergen = "Lu"
-	Mollusca      Allergen = "We"
-)
-
-var allergenOrder = fmap.Order(
-	Wheat, Rye, Barley, Oats, Crustaceans, Eggs, Fish, Peanuts, Soybeans, Milk,
-	Almonds, HazelNuts, WalNuts, CashewNuts, PecanNuts, BrazilNuts, Pistachios, MacadamiaNuts, Celeriac, Mustard,
-	Sesame, Sulphur, Lupines, Mollusca,
-)
-
-var allergensEN = map[Allergen]string{
-	Wheat:         "cereals containing gluten wheat (spelt, kamut)",
-	Rye:           "cereals containing gluten rye",
-	Barley:        "cereals containing gluten barley",
-	Oats:          "cereals containing gluten oats",
-	Crustaceans:   "contains crustaceans",
-	Eggs:          "eggs",
-	Fish:          "fish",
-	Peanuts:       "peanuts",
-	Soybeans:      "soybeans",
-	Milk:          "milk/lactose",
-	Almonds:       "almonds",
-	HazelNuts:     "hazelnuts",
-	WalNuts:       "walnuts",
-	CashewNuts:    "cashew nuts",
-	PecanNuts:     "pecan nuts",
-	BrazilNuts:    "brazil nuts",
-	Pistachios:    "pistachios",
-	MacadamiaNuts: "macadamia nuts",
-	Celeriac:      "celeriac",
-	Mustard:       "mustard",
-	Sesame:        "sesame",
-	Sulphur:       "sulphur dioxide and sulphites",
-	Lupines:       "lupines",
-	Mollusca:      "mollusca",
-}
-
-var allergensDE = map[Allergen]string{
-	Wheat:         "glutenhaltiges Getreide Weizen (Dinkel, Kamut)",
-	Rye:           "glutenhaltiges Getreide Roggen",
-	Barley:        "glutenhaltiges Getreide Gerste",
-	Oats:          "glutenhaltiges Getreide Hafer",
-	Crustaceans:   "Krebstiere",
-	Eggs:          "Eier",
-	Fish:          "Fisch",
-	Peanuts:       "Erdnüsse",
-	Soybeans:      "Sojabohnen",
-	Milk:          "Milch/Laktose",
-	Almonds:       "Schalenfrüchte Mandeln",
-	HazelNuts:     "Schalenfrüchte Haselnüsse",
-	WalNuts:       "Schalenfrüchte Walnüsse",
-	CashewNuts:    "Schalenfrüchte Kaschu(Cashew)nüsse",
-	PecanNuts:     "Schalenfrüchte Pekannüsse",
-	BrazilNuts:    "Schalenfrüchte Paranüsse",
-	Pistachios:    "Schalenfrüchte Pistazien",
-	MacadamiaNuts: "Schalenfrüchte Macadamianüsse",
-	Celeriac:      "Sellerie",
-	Mustard:       "Senf",
-	Sesame:        "Sesam",
-	Sulphur:       "Schwefeldioxid und Sulfite",
-	Lupines:       "Lupinen",
-	Mollusca:      "Weichtiere",
 }
 
 type Ingredient string

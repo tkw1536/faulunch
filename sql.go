@@ -58,7 +58,7 @@ type MenuItem struct {
 	HTMLBeilagenDE    template.HTML
 	HTMLBeilagenEN    template.HTML
 
-	AllergenAnnotations   datatypes.JSONType[[]Allergen]
+	AllergenAnnotations   datatypes.JSONType[[]annotations.Allergen]
 	AdditiveAnnotations   datatypes.JSONType[[]annotations.Additive]
 	IngredientAnnotations datatypes.JSONType[[]Ingredient]
 }
@@ -110,7 +110,7 @@ func (m *MenuItem) extractDietaryCategory() {
 
 func (m MenuItem) isGlutenFree() bool {
 	for _, allergen := range m.AllergenAnnotations.Data() {
-		if allergen == Wheat || allergen == Rye || allergen == Barley || allergen == Oats {
+		if allergen == annotations.Wheat || allergen == annotations.Rye || allergen == annotations.Barley || allergen == annotations.Oats {
 			return false
 		}
 	}

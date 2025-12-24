@@ -1,5 +1,7 @@
 package faulunch
 
+import "github.com/tkw1536/faulunch/internal/annotations"
+
 func (m *MenuItem) getDietaryCategory() DietaryCategory {
 	ingredients := m.IngredientAnnotations.Data()
 
@@ -27,7 +29,7 @@ func (m *MenuItem) getDietaryCategory() DietaryCategory {
 	}
 	if !hasFish {
 		for _, allergen := range m.AllergenAnnotations.Data() {
-			if allergen == Fish {
+			if allergen == annotations.Fish {
 				hasFish = true
 				break
 			}
