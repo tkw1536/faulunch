@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog"
+	"github.com/tkw1536/faulunch/internal/annotations"
 	"github.com/tkw1536/faulunch/internal/ltime"
 	"github.com/tkw1536/faulunch/internal/types"
 	"gorm.io/datatypes"
@@ -58,7 +59,7 @@ type MenuItem struct {
 	HTMLBeilagenEN    template.HTML
 
 	AllergenAnnotations   datatypes.JSONType[[]Allergen]
-	AdditiveAnnotations   datatypes.JSONType[[]Additive]
+	AdditiveAnnotations   datatypes.JSONType[[]annotations.Additive]
 	IngredientAnnotations datatypes.JSONType[[]Ingredient]
 }
 

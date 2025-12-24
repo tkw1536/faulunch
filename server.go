@@ -14,6 +14,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/tkw1536/faulunch/internal"
+	"github.com/tkw1536/faulunch/internal/annotations"
 	"github.com/tkw1536/faulunch/internal/ltime"
 	"golang.org/x/text/language"
 )
@@ -235,7 +236,7 @@ type menuContext struct {
 	Items      []MenuItem
 
 	Allergens   []Allergen
-	Additives   []Additive
+	Additives   []annotations.Additive
 	Ingredients []Ingredient
 }
 
@@ -308,7 +309,7 @@ func (server *Server) HandleMenu(location Location, day ltime.Day, english bool,
 	}
 
 	// merge all the annotations
-	additivesSet := make(map[Additive]struct{})
+	additivesSet := make(map[annotations.Additive]struct{})
 	allergensSet := make(map[Allergen]struct{})
 	ingredientsSet := make(map[Ingredient]struct{})
 
@@ -324,7 +325,7 @@ func (server *Server) HandleMenu(location Location, day ltime.Day, english bool,
 		}
 	}
 
-	mc.Additives = internal.SortedKeysOf(additivesSet, func(a, b Additive) int { return a.Cmp(b) })
+	mc.Additives = internal.SortedKeysOf(additivesSet, func(a, b annotations.Additive) int { return a.Cmp(b) })
 	mc.Allergens = internal.SortedKeysOf(allergensSet, func(a, b Allergen) int { return a.Cmp(b) })
 	mc.Ingredients = internal.SortedKeysOf(ingredientsSet, func(a, b Ingredient) int { return a.Cmp(b) })
 

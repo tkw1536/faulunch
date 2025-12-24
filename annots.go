@@ -9,13 +9,14 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/tkw1536/faulunch/internal"
+	"github.com/tkw1536/faulunch/internal/annotations"
 	"github.com/tkw1536/faulunch/internal/fmap"
 )
 
 var annotationPattern = regexp.MustCompile(`\([^)\s]+\)`)
 
 func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
-	additives := make(map[Additive]struct{})
+	additives := make(map[annotations.Additive]struct{})
 	allergens := make(map[Allergen]struct{})
 	ingredients := make(map[Ingredient]struct{}, len(item.Piktogramme.Data()))
 
@@ -35,13 +36,13 @@ func (item *MenuItem) extractAnnotations(logger *zerolog.Logger) {
 	// store all the additive and ingredient data
 	// then sort it for convenience
 
-	internal.SetJSONData(&item.AdditiveAnnotations, internal.SortedKeysOf(additives, func(a, b Additive) int { return a.Cmp(b) }))
+	internal.SetJSONData(&item.AdditiveAnnotations, internal.SortedKeysOf(additives, func(a, b annotations.Additive) int { return a.Cmp(b) }))
 	internal.SetJSONData(&item.AllergenAnnotations, internal.SortedKeysOf(allergens, func(a, b Allergen) int { return a.Cmp(b) }))
 	internal.SetJSONData(&item.IngredientAnnotations, internal.SortedKeysOf(ingredients, func(a, b Ingredient) int { return a.Cmp(b) }))
 }
 
 // RenderAnnotations renders annotations in the provided text
-func (menu *MenuItem) renderAnnotations(logger *zerolog.Logger, text string, english bool, additives map[Additive]struct{}, allergens map[Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
+func (menu *MenuItem) renderAnnotations(logger *zerolog.Logger, text string, english bool, additives map[annotations.Additive]struct{}, allergens map[Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
 	values := annotationPattern.Split(text, -1)
 	for i, v := range values {
 		values[i] = template.HTMLEscapeString(v)
@@ -136,7 +137,7 @@ func fixAnnotTypos(annots []string) []string {
 // validMatches checks if at least one annotation inside the match is valid
 func anyValidAnnot(matches ...string) bool {
 	for _, c := range matches {
-		if Additive(c).Known() || Allergen(c).Known() || Ingredient(c).Known() {
+		if annotations.Additive(c).Known() || Allergen(c).Known() || Ingredient(c).Known() {
 			return true
 		}
 	}
@@ -144,9 +145,9 @@ func anyValidAnnot(matches ...string) bool {
 }
 
 // renders and extracts a single annotation
-func (menu *MenuItem) renderAnnot(logger *zerolog.Logger, annot string, english bool, additives map[Additive]struct{}, allergens map[Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
+func (menu *MenuItem) renderAnnot(logger *zerolog.Logger, annot string, english bool, additives map[annotations.Additive]struct{}, allergens map[Allergen]struct{}, ingredients map[Ingredient]struct{}) template.HTML {
 	{
-		add := Additive(annot)
+		add := annotations.Additive(annot)
 		if add, ok := add.Normalize(); ok {
 			additives[add] = struct{}{}
 			if english {
@@ -185,86 +186,6 @@ func (menu *MenuItem) renderAnnot(logger *zerolog.Logger, annot string, english 
 	logger.Error().Str("annot", annot).Int("day", int(menu.Day)).Str("location", string(menu.Location)).Bool("english", english).Msg("Unknown annotation")
 
 	return template.HTML(template.HTMLEscapeString(annot))
-}
-
-type Additive string
-
-const (
-	Color           Additive = "1"
-	Caffeine        Additive = "2"
-	Preservatives   Additive = "4"
-	Sweeteners      Additive = "5"
-	Antioxidant     Additive = "7"
-	FlavorEnhancers Additive = "8"
-	Sulphurated     Additive = "9"
-	Blackened       Additive = "10"
-	Waxed           Additive = "11"
-	Phosphate       Additive = "12"
-	Phenylalanine   Additive = "13"
-	Coating         Additive = "30"
-)
-
-var additiveOrder = order(
-	Color, Caffeine, Preservatives, Sweeteners, Antioxidant, FlavorEnhancers, Sulphurated, Blackened, Waxed, Phosphate, Phenylalanine,
-	Coating,
-)
-
-func (a Additive) Cmp(other Additive) int {
-	return additiveOrder[a] - additiveOrder[other]
-}
-
-func (a Additive) Known() bool {
-	return additiveOrder.Has(a)
-}
-
-func (a Additive) Normalize() (Additive, bool) {
-	key, _, ok := additiveOrder.Get(a)
-	return key, ok
-}
-
-func (a Additive) ENString() string {
-	return additivesEN[a]
-}
-func (a Additive) ENHTML() template.HTML {
-	return template.HTML("<a class='annot' href='#add-" + string(a) + "' title='" + a.ENString() + "'>" + string(a) + "</a>")
-}
-
-func (a Additive) DEString() string {
-	return additiveDE[a]
-}
-
-func (a Additive) DEHTML() template.HTML {
-	return template.HTML("<a class='annot' href='#add-" + string(a) + "' title='" + a.DEString() + "'>" + string(a) + "</a>")
-}
-
-var additivesEN = map[Additive]string{
-	Color:           "contains colour additives",
-	Caffeine:        "contains caffeine",
-	Preservatives:   "contains preservatives",
-	Sweeteners:      "contains sweeteners",
-	Antioxidant:     "contains antioxidant",
-	FlavorEnhancers: "contains flavour enhancers",
-	Sulphurated:     "sulphurated",
-	Blackened:       "blackened",
-	Waxed:           "waxed",
-	Phosphate:       "contains phosphate",
-	Phenylalanine:   "contains sweeteners = contains a source of phenylalanine",
-	Coating:         "compound coating",
-}
-
-var additiveDE = map[Additive]string{
-	Color:           "mit Farbstoff",
-	Caffeine:        "mit Coffein",
-	Preservatives:   "mit Konservierungsstoff",
-	Sweeteners:      "mit Süßungsmittel",
-	Antioxidant:     "mit Antioxidationsmittel",
-	FlavorEnhancers: "mit Geschmacksverstärker",
-	Sulphurated:     "geschwefelt",
-	Blackened:       "geschwärzt",
-	Waxed:           "gewachst",
-	Phosphate:       "mit Phosphat",
-	Phenylalanine:   "mit Süßungsmittel = enthält eine Phenylalaninquelle",
-	Coating:         "mit Fettglasur",
 }
 
 type Allergen string
@@ -323,7 +244,7 @@ const (
 	Mollusca      Allergen = "We"
 )
 
-var allergenOrder = order(
+var allergenOrder = fmap.Order(
 	Wheat, Rye, Barley, Oats, Crustaceans, Eggs, Fish, Peanuts, Soybeans, Milk,
 	Almonds, HazelNuts, WalNuts, CashewNuts, PecanNuts, BrazilNuts, Pistachios, MacadamiaNuts, Celeriac, Mustard,
 	Sesame, Sulphur, Lupines, Mollusca,
@@ -431,7 +352,7 @@ func (i *Ingredient) normalize() {
 	}
 }
 
-var ingredientOrder = order(
+var ingredientOrder = fmap.Order(
 	Vegetarian,
 	Beef, Poultry, Lamb, FishI, Pork, Game,
 	Vegan, MensaVital, Organic, FishMSC,
@@ -509,12 +430,4 @@ func (i Ingredient) DEHTML() template.HTML {
 }
 func (i Ingredient) DEDef() template.HTML {
 	return template.HTML("<a class='annot' href='#ing-" + string(i) + "' title='" + i.DEString() + "'>" + i.DEString() + "</a>")
-}
-
-func order[T ~string](values ...T) fmap.FMap[T, int] {
-	m := make(fmap.FMap[T, int], len(values))
-	for index, item := range values {
-		m.Add(item, index)
-	}
-	return m
 }
