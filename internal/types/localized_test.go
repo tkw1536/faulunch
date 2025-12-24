@@ -1,11 +1,15 @@
-package types
+package types_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/tkw1536/faulunch/internal/types"
+)
 
 func TestLPrice_String(t *testing.T) {
 	tests := []struct {
 		name   string
-		price  LPrice
+		price  types.LPrice
 		wantEN string
 		wantDE string
 	}{
@@ -33,7 +37,7 @@ func TestLPrice_String(t *testing.T) {
 func TestLFloat_String(t *testing.T) {
 	tests := []struct {
 		name   string
-		value  LFloat
+		value  types.LFloat
 		wantEN string
 		wantDE string
 	}{

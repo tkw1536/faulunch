@@ -1,54 +1,56 @@
-package ltime
+package ltime_test
 
 import (
 	"testing"
 	"time"
+
+	"github.com/tkw1536/faulunch/internal/ltime"
 )
 
 func TestParseDay(t *testing.T) {
 	tests := []struct {
 		name  string
 		input any
-		want  Day
+		want  ltime.Day
 	}{
 		// time.Time
-		{name: "time.Time", input: time.Unix(1609459200, 0), want: Day(1609459200)},
+		{name: "time.Time", input: time.Unix(1609459200, 0), want: ltime.Day(1609459200)},
 
 		// string
-		{name: "string valid", input: "1609459200", want: Day(1609459200)},
-		{name: "string invalid", input: "not a number", want: Day(0)},
-		{name: "string empty", input: "", want: Day(0)},
+		{name: "string valid", input: "1609459200", want: ltime.Day(1609459200)},
+		{name: "string invalid", input: "not a number", want: ltime.Day(0)},
+		{name: "string empty", input: "", want: ltime.Day(0)},
 
 		// []byte
-		{name: "[]byte valid", input: []byte("1609459200"), want: Day(1609459200)},
-		{name: "[]byte invalid", input: []byte("invalid"), want: Day(0)},
+		{name: "[]byte valid", input: []byte("1609459200"), want: ltime.Day(1609459200)},
+		{name: "[]byte invalid", input: []byte("invalid"), want: ltime.Day(0)},
 
 		// int types
-		{name: "int", input: int(1609459200), want: Day(1609459200)},
-		{name: "int8", input: int8(100), want: Day(100)},
-		{name: "int16", input: int16(1000), want: Day(1000)},
-		{name: "int32", input: int32(1609459200), want: Day(1609459200)},
-		{name: "int64", input: int64(1609459200), want: Day(1609459200)},
+		{name: "int", input: int(1609459200), want: ltime.Day(1609459200)},
+		{name: "int8", input: int8(100), want: ltime.Day(100)},
+		{name: "int16", input: int16(1000), want: ltime.Day(1000)},
+		{name: "int32", input: int32(1609459200), want: ltime.Day(1609459200)},
+		{name: "int64", input: int64(1609459200), want: ltime.Day(1609459200)},
 
 		// uint types
-		{name: "uint", input: uint(1609459200), want: Day(1609459200)},
-		{name: "uint8", input: uint8(100), want: Day(100)},
-		{name: "uint16", input: uint16(1000), want: Day(1000)},
-		{name: "uint32", input: uint32(1609459200), want: Day(1609459200)},
-		{name: "uint64", input: uint64(1609459200), want: Day(1609459200)},
+		{name: "uint", input: uint(1609459200), want: ltime.Day(1609459200)},
+		{name: "uint8", input: uint8(100), want: ltime.Day(100)},
+		{name: "uint16", input: uint16(1000), want: ltime.Day(1000)},
+		{name: "uint32", input: uint32(1609459200), want: ltime.Day(1609459200)},
+		{name: "uint64", input: uint64(1609459200), want: ltime.Day(1609459200)},
 
 		// negative becomes zero
-		{name: "negative int", input: int(-100), want: Day(0)},
-		{name: "negative int64", input: int64(-1609459200), want: Day(0)},
+		{name: "negative int", input: int(-100), want: ltime.Day(0)},
+		{name: "negative int64", input: int64(-1609459200), want: ltime.Day(0)},
 
 		// unknown type
-		{name: "unknown type", input: struct{}{}, want: Day(0)},
-		{name: "nil", input: nil, want: Day(0)},
+		{name: "unknown type", input: struct{}{}, want: ltime.Day(0)},
+		{name: "nil", input: nil, want: ltime.Day(0)},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ParseDay(tt.input); got != tt.want {
+			if got := ltime.ParseDay(tt.input); got != tt.want {
 				t.Errorf("ParseDay() = %v, want %v", got, tt.want)
 			}
 		})
@@ -57,7 +59,7 @@ func TestParseDay(t *testing.T) {
 
 func TestDay_Normalize(t *testing.T) {
 	// Create a day from a specific timestamp (2021-01-01 12:30:00 UTC)
-	d := Day(1609504200)
+	d := ltime.Day(1609504200)
 	normalized := d.Normalize()
 
 	// The normalized day should be at midnight Berlin time
@@ -71,7 +73,7 @@ func TestDay_Add(t *testing.T) {
 	// Use a known date: 2021-01-01 00:00:00 Berlin time
 	berlin, _ := time.LoadLocation("Europe/Berlin")
 	baseTime := time.Date(2021, 1, 1, 0, 0, 0, 0, berlin)
-	d := Day(baseTime.Unix())
+	d := ltime.Day(baseTime.Unix())
 
 	tests := []struct {
 		name  string
@@ -96,9 +98,9 @@ func TestDay_Add(t *testing.T) {
 }
 
 func TestDay_Equal(t *testing.T) {
-	d1 := Day(1609459200)
-	d2 := Day(1609459200)
-	d3 := Day(1609545600)
+	d1 := ltime.Day(1609459200)
+	d2 := ltime.Day(1609459200)
+	d3 := ltime.Day(1609545600)
 
 	if !d1.Equal(d2) {
 		t.Errorf("Equal() should return true for same values")
@@ -109,7 +111,7 @@ func TestDay_Equal(t *testing.T) {
 }
 
 func TestDay_Value(t *testing.T) {
-	d := Day(1609459200)
+	d := ltime.Day(1609459200)
 	val, err := d.Value()
 	if err != nil {
 		t.Errorf("Value() returned error: %v", err)
@@ -120,24 +122,24 @@ func TestDay_Value(t *testing.T) {
 }
 
 func TestDay_Scan(t *testing.T) {
-	var d Day
+	var d ltime.Day
 	err := d.Scan(int64(1609459200))
 	if err != nil {
 		t.Errorf("Scan() returned error: %v", err)
 	}
-	if d != Day(1609459200) {
-		t.Errorf("Scan() = %v, want %v", d, Day(1609459200))
+	if d != ltime.Day(1609459200) {
+		t.Errorf("Scan() = %v, want %v", d, ltime.Day(1609459200))
 	}
 }
 
 func TestDay_String(t *testing.T) {
 	tests := []struct {
 		name string
-		day  Day
+		day  ltime.Day
 		want string
 	}{
-		{name: "zero", day: Day(0), want: "0"},
-		{name: "positive", day: Day(1609459200), want: "1609459200"},
+		{name: "zero", day: ltime.Day(0), want: "0"},
+		{name: "positive", day: ltime.Day(1609459200), want: "1609459200"},
 	}
 
 	for _, tt := range tests {
@@ -154,79 +156,79 @@ func TestDay_LocalizedString(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		day    Day
+		day    ltime.Day
 		wantEN string
 		wantDE string
 	}{
 		{
 			name:   "Jan 1st 2021 (Friday)",
-			day:    Day(time.Date(2021, 1, 1, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 1, 1, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Friday, 1st January 2021",
 			wantDE: "Freitag, 1. Januar 2021",
 		},
 		{
 			name:   "Feb 2nd 2021 (Tuesday)",
-			day:    Day(time.Date(2021, 2, 2, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 2, 2, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Tuesday, 2nd February 2021",
 			wantDE: "Dienstag, 2. Februar 2021",
 		},
 		{
 			name:   "Mar 3rd 2021 (Wednesday)",
-			day:    Day(time.Date(2021, 3, 3, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 3, 3, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Wednesday, 3rd March 2021",
 			wantDE: "Mittwoch, 3. März 2021",
 		},
 		{
 			name:   "Apr 4th 2021 (Sunday)",
-			day:    Day(time.Date(2021, 4, 4, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 4, 4, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Sunday, 4th April 2021",
 			wantDE: "Sonntag, 4. April 2021",
 		},
 		{
 			name:   "May 21st 2021 (Friday)",
-			day:    Day(time.Date(2021, 5, 21, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 5, 21, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Friday, 21st May 2021",
 			wantDE: "Freitag, 21. Mai 2021",
 		},
 		{
 			name:   "Jun 22nd 2021 (Tuesday)",
-			day:    Day(time.Date(2021, 6, 22, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 6, 22, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Tuesday, 22nd June 2021",
 			wantDE: "Dienstag, 22. Juni 2021",
 		},
 		{
 			name:   "Jul 23rd 2021 (Friday)",
-			day:    Day(time.Date(2021, 7, 23, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 7, 23, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Friday, 23rd July 2021",
 			wantDE: "Freitag, 23. Juli 2021",
 		},
 		{
 			name:   "Aug 31st 2021 (Tuesday)",
-			day:    Day(time.Date(2021, 8, 31, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 8, 31, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Tuesday, 31st August 2021",
 			wantDE: "Dienstag, 31. August 2021",
 		},
 		{
 			name:   "Sep 15th 2021 (Wednesday)",
-			day:    Day(time.Date(2021, 9, 15, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 9, 15, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Wednesday, 15th September 2021",
 			wantDE: "Mittwoch, 15. September 2021",
 		},
 		{
 			name:   "Oct 11th 2021 (Monday)",
-			day:    Day(time.Date(2021, 10, 11, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 10, 11, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Monday, 11th October 2021",
 			wantDE: "Montag, 11. Oktober 2021",
 		},
 		{
 			name:   "Nov 12th 2021 (Friday)",
-			day:    Day(time.Date(2021, 11, 12, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 11, 12, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Friday, 12th November 2021",
 			wantDE: "Freitag, 12. November 2021",
 		},
 		{
 			name:   "Dec 25th 2021 (Saturday)",
-			day:    Day(time.Date(2021, 12, 25, 0, 0, 0, 0, berlin).Unix()),
+			day:    ltime.Day(time.Date(2021, 12, 25, 0, 0, 0, 0, berlin).Unix()),
 			wantEN: "Saturday, 25th December 2021",
 			wantDE: "Samstag, 25. Dezember 2021",
 		},
@@ -246,7 +248,7 @@ func TestDay_LocalizedString(t *testing.T) {
 
 func TestDay_LocalizedHTML(t *testing.T) {
 	berlin, _ := time.LoadLocation("Europe/Berlin")
-	d := Day(time.Date(2021, 1, 1, 0, 0, 0, 0, berlin).Unix())
+	d := ltime.Day(time.Date(2021, 1, 1, 0, 0, 0, 0, berlin).Unix())
 
 	enHTML := d.ENHTML()
 	if string(enHTML) != "<time datetime='2021-01-01'>Friday, 1st January 2021</time>" {

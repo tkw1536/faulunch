@@ -1,15 +1,17 @@
-package types
+package types_test
 
 import (
 	"encoding/xml"
 	"testing"
+
+	"github.com/tkw1536/faulunch/internal/types"
 )
 
 func TestSmartFloat64_UnmarshalText(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
-		want    SmartFloat64
+		want    types.SmartFloat64
 		wantErr bool
 	}{
 		// empty values
@@ -39,7 +41,7 @@ func TestSmartFloat64_UnmarshalText(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got SmartFloat64
+			var got types.SmartFloat64
 			err := got.UnmarshalText([]byte(tt.input))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
@@ -56,7 +58,7 @@ func TestSmartFloat64_UnmarshalXMLAttr(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
-		want    SmartFloat64
+		want    types.SmartFloat64
 		wantErr bool
 	}{
 		{name: "empty attr", input: "", want: 0, wantErr: false},
@@ -69,7 +71,7 @@ func TestSmartFloat64_UnmarshalXMLAttr(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got SmartFloat64
+			var got types.SmartFloat64
 			attr := xml.Attr{Value: tt.input}
 			err := got.UnmarshalXMLAttr(attr)
 			if (err != nil) != tt.wantErr {
