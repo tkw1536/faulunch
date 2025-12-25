@@ -2,7 +2,9 @@
 package fmap
 
 //spellchecker:words strings
-import "strings"
+import (
+	"strings"
+)
 
 // FMap represents a map that identifies keys via unicode case-folding.
 // The original key case is maintained.
@@ -12,7 +14,7 @@ type FMap[K ~string, V any] map[K]V
 // If the element was previously contained, does not change the value.
 // Returns true if the element was not contained previously.
 func (fmap FMap[K, V]) Add(key K, value V) (new bool) {
-	if !fmap.Has(key) {
+	if fmap.Has(key) {
 		return false
 	}
 	fmap[key] = value

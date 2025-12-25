@@ -7,8 +7,8 @@ import (
 )
 
 func TestFMap_Add(t *testing.T) {
-	// Note: Add() only updates the value if the key already exists (case-insensitive).
-	// It returns true if the key was found and updated, false if the key was not found.
+	// Note: Add() adds a new element to the map only if the key does not already exist (case-insensitive).
+	// It returns true if the key was new (added), false if the key already existed (not changed).
 	tests := []struct {
 		name      string
 		initial   fmap.FMap[string, int]
@@ -18,28 +18,36 @@ func TestFMap_Add(t *testing.T) {
 		wantValue int
 	}{
 		{
-			name:      "add to empty map - key not found",
+			name:      "add to empty map - new key",
 			initial:   fmap.FMap[string, int]{},
 			key:       "Hello",
 			value:     1,
-			wantNew:   false,
-			wantValue: 0, // not added
+			wantNew:   true,
+			wantValue: 1,
 		},
 		{
-			name:      "update existing key same case",
+			name:      "add existing key same case - not added",
 			initial:   fmap.FMap[string, int]{"Hello": 1},
 			key:       "Hello",
 			value:     2,
-			wantNew:   true,
-			wantValue: 2,
+			wantNew:   false,
+			wantValue: 1, // original value preserved
 		},
 		{
-			name:      "update existing key different case",
+			name:      "add existing key different case - not added",
 			initial:   fmap.FMap[string, int]{"Hello": 1},
 			key:       "HELLO",
 			value:     3,
+			wantNew:   false,
+			wantValue: 1, // original value preserved
+		},
+		{
+			name:      "add different key",
+			initial:   fmap.FMap[string, int]{"Hello": 1},
+			key:       "World",
+			value:     2,
 			wantNew:   true,
-			wantValue: 3,
+			wantValue: 2,
 		},
 	}
 
@@ -50,8 +58,8 @@ func TestFMap_Add(t *testing.T) {
 				t.Errorf("Add() = %v, want %v", got, tt.wantNew)
 			}
 			_, val, ok := tt.initial.Get(tt.key)
-			if tt.wantValue == 0 && !ok {
-				// expected: key not found
+			if !ok {
+				t.Errorf("Get(%q) key not found after Add", tt.key)
 				return
 			}
 			if val != tt.wantValue {
