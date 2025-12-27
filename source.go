@@ -3,9 +3,6 @@ package faulunch
 
 //spellchecker:words encoding errors http time github zerolog gorm
 import (
-	"encoding/xml"
-	"errors"
-	"net/http"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -42,46 +39,19 @@ func FetchAndSyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
 
 // FetchAndSync is like calling Fetch() and then Sync() for the given location.
 func FetchAndSync(logger *zerolog.Logger, db *gorm.DB, loc location.Location) error {
-	german, err := Fetch(loc, false)
+	german, err := plan.Fetch(loc, false)
 	logger.Err(err).Str("location", string(loc)).Bool("english", false).Msg("fetching data")
 	if err != nil {
 		return err
 	}
 
-	english, err := Fetch(loc, true)
+	english, err := plan.Fetch(loc, true)
 	logger.Err(err).Str("location", string(loc)).Bool("english", true).Msg("fetching data")
 	if err != nil {
 		return err
 	}
 
 	return Sync(logger, db, german, english)
-}
-
-var errInvalidStatusCode = errors.New("invalid response code")
-
-// Fetch fetches a plan for the given location and language.
-func Fetch(loc location.Location, english bool) (plan plan.Plan, err error) {
-	res, err := http.Get(PlanURL(loc, english))
-	if err != nil {
-		return plan, err
-	}
-	if res.StatusCode != http.StatusOK {
-		return plan, errInvalidStatusCode
-	}
-
-	err = xml.NewDecoder(res.Body).Decode(&plan)
-	return
-}
-
-// PlanURL returns the url of a given plan and language
-func PlanURL(loc location.Location, english bool) string {
-	dest := "https://www.max-manager.de/daten-extern/sw-erlangen-nuernberg/xml/"
-	if english {
-		dest += "en/"
-	}
-	dest += string(loc) + ".xml"
-
-	return dest
 }
 
 // Sync synchronizes the given german and english plans into the database
