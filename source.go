@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"github.com/tkw1536/faulunch/internal/plan"
 	"gorm.io/gorm"
 )
 
@@ -58,13 +59,13 @@ func FetchAndSync(logger *zerolog.Logger, db *gorm.DB, location Location) error 
 var errInvalidStatusCode = errors.New("invalid response code")
 
 // Fetch fetches a plan for the given location and language.
-func Fetch(location Location, english bool) (plan Plan, err error) {
+func Fetch(location Location, english bool) (plan plan.Plan, err error) {
 	res, err := http.Get(PlanURL(location, english))
 	if err != nil {
-		return Plan{}, err
+		return plan, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return Plan{}, errInvalidStatusCode
+		return plan, errInvalidStatusCode
 	}
 
 	err = xml.NewDecoder(res.Body).Decode(&plan)
@@ -84,7 +85,7 @@ func PlanURL(location Location, english bool) string {
 
 // Sync synchronizes the given german and english plans into the database
 // Any previous content for the existing days and locations is erased.
-func Sync(logger *zerolog.Logger, db *gorm.DB, german, english Plan) error {
+func Sync(logger *zerolog.Logger, db *gorm.DB, german, english plan.Plan) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		location, timestamps, items := Merge(logger, german, english)
 		times := make([]time.Time, len(timestamps))

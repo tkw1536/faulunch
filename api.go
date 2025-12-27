@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// API implements querying data from the database.
 type API struct {
 	DB *gorm.DB
 }
@@ -28,7 +29,7 @@ func (api *API) Locations() (locations []Location, err error) {
 	return
 }
 
-// Pagination represents an environment for the
+// Pagination represents the state of a pagaintation.
 type Pagination struct {
 	Head []ltime.Day
 
@@ -159,6 +160,7 @@ func (api *API) DayPagination(location Location, query ltime.Day, size int) (pag
 	return
 }
 
+// reverse reverses a list
 func reverse[S ~[]E, E any](s S) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
