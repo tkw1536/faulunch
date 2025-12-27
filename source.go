@@ -3,6 +3,7 @@ package faulunch
 
 //spellchecker:words encoding errors http time github zerolog gorm
 import (
+	"net/http"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -39,13 +40,13 @@ func FetchAndSyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
 
 // FetchAndSync is like calling Fetch() and then Sync() for the given location.
 func FetchAndSync(logger *zerolog.Logger, db *gorm.DB, loc location.Location) error {
-	german, err := plan.Fetch(loc, false)
+	german, err := plan.Fetch(http.DefaultClient, loc, false)
 	logger.Err(err).Str("location", string(loc)).Bool("english", false).Msg("fetching data")
 	if err != nil {
 		return err
 	}
 
-	english, err := plan.Fetch(loc, true)
+	english, err := plan.Fetch(http.DefaultClient, loc, true)
 	logger.Err(err).Str("location", string(loc)).Bool("english", true).Msg("fetching data")
 	if err != nil {
 		return err
