@@ -15,6 +15,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/tkw1536/faulunch/internal"
 	"github.com/tkw1536/faulunch/internal/annotations"
+	"github.com/tkw1536/faulunch/internal/location"
 	"github.com/tkw1536/faulunch/internal/ltime"
 	"golang.org/x/text/language"
 )
@@ -113,26 +114,26 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// location
 		server.mux.HandleFunc("GET /en/{location}/", func(w http.ResponseWriter, r *http.Request) {
-			location := Location(r.PathValue("location"))
-			server.HandleLocation(location, true, w, r)
+			loc := location.Location(r.PathValue("location"))
+			server.HandleLocation(loc, true, w, r)
 		})
 
 		server.mux.HandleFunc("GET /de/{location}/", func(w http.ResponseWriter, r *http.Request) {
-			location := Location(r.PathValue("location"))
-			server.HandleLocation(location, false, w, r)
+			loc := location.Location(r.PathValue("location"))
+			server.HandleLocation(loc, false, w, r)
 		})
 
 		// menu
 
 		server.mux.HandleFunc("GET /en/{location}/{day}", func(w http.ResponseWriter, r *http.Request) {
 			day := ltime.ParseDay(r.PathValue("day"))
-			location := Location(r.PathValue("location"))
-			server.HandleMenu(location, day, true, w, r)
+			loc := location.Location(r.PathValue("location"))
+			server.HandleMenu(loc, day, true, w, r)
 		})
 
 		server.mux.HandleFunc("GET /de/{location}/{day}", func(w http.ResponseWriter, r *http.Request) {
 			day := ltime.ParseDay(r.PathValue("day"))
-			location := Location(r.PathValue("location"))
+			location := location.Location(r.PathValue("location"))
 			server.HandleMenu(location, day, false, w, r)
 		})
 
@@ -192,7 +193,7 @@ func (gc globalContext) Alternate() template.HTML {
 
 type indexContext struct {
 	globalContext
-	Locations []Location
+	Locations []location.Location
 }
 
 func (server *Server) HandleIndex(english bool, w http.ResponseWriter, r *http.Request) {
@@ -231,7 +232,7 @@ type menuContext struct {
 	globalContext
 
 	Day        ltime.Day
-	Location   Location
+	Location   location.Location
 	Pagination Pagination
 	Items      []MenuItem
 
@@ -262,20 +263,20 @@ const (
 	menuPaginationSize = 2
 )
 
-func (server *Server) HandleLocation(location Location, english bool, w http.ResponseWriter, r *http.Request) {
-	logger := server.Logger.With().Str("route", "HandleLocation").Str("location", string(location)).Logger()
+func (server *Server) HandleLocation(loc location.Location, english bool, w http.ResponseWriter, r *http.Request) {
+	logger := server.Logger.With().Str("route", "HandleLocation").Str("location", string(loc)).Logger()
 
-	now, err := server.API.CurrentDay(location, ltime.Today())
+	now, err := server.API.CurrentDay(loc, ltime.Today())
 	logger.Debug().Err(err).Msg("API.CurrentDay")
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
-	server.HandleMenu(location, now, english, w, r)
+	server.HandleMenu(loc, now, english, w, r)
 }
 
-func (server *Server) HandleMenu(location Location, day ltime.Day, english bool, w http.ResponseWriter, r *http.Request) {
-	logger := server.Logger.With().Str("route", "HandleMenu").Str("location", string(location)).Stringer("day", day).Logger()
+func (server *Server) HandleMenu(loc location.Location, day ltime.Day, english bool, w http.ResponseWriter, r *http.Request) {
+	logger := server.Logger.With().Str("route", "HandleMenu").Str("location", string(loc)).Stringer("day", day).Logger()
 
 	mc := menuContext{
 		globalContext: globalContext{
@@ -283,7 +284,7 @@ func (server *Server) HandleMenu(location Location, day ltime.Day, english bool,
 			requestURI: r.URL.RequestURI(),
 			legal:      server.Legal,
 		},
-		Location: location,
+		Location: loc,
 		Day:      day,
 	}
 
@@ -294,14 +295,14 @@ func (server *Server) HandleMenu(location Location, day ltime.Day, english bool,
 	var err error
 
 	// fetch all the items
-	mc.Items, err = server.API.MenuItems(location, day)
+	mc.Items, err = server.API.MenuItems(loc, day)
 	logger.Debug().Err(err).Msg("API.MenuItems")
 	if err != nil || len(mc.Items) == 0 {
 		http.NotFound(w, r)
 		return
 	}
 
-	mc.Pagination, err = server.API.DayPagination(location, day, menuPaginationSize)
+	mc.Pagination, err = server.API.DayPagination(loc, day, menuPaginationSize)
 	logger.Debug().Err(err).Msg("API.DayPagination")
 	if err != nil {
 		http.NotFound(w, r)

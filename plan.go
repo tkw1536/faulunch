@@ -5,15 +5,16 @@ package faulunch
 import (
 	"github.com/rs/zerolog"
 	"github.com/tkw1536/faulunch/internal"
+	"github.com/tkw1536/faulunch/internal/location"
 	"github.com/tkw1536/faulunch/internal/ltime"
 	"github.com/tkw1536/faulunch/internal/plan"
 	"github.com/tkw1536/faulunch/internal/types"
 )
 
 // Merge merges the german and english plan for the given location into a set of menu items, a location, and a timestamp.
-func Merge(logger *zerolog.Logger, german plan.Plan, english plan.Plan) (location Location, timestamps []ltime.Day, menu []MenuItem) {
+func Merge(logger *zerolog.Logger, german plan.Plan, english plan.Plan) (loc location.Location, timestamps []ltime.Day, menu []MenuItem) {
 	// extract the location
-	location = LocationOfID(german.Location)
+	loc = location.LocationOfID(german.Location)
 
 	// create a map from days => category to menuitem
 	dayCatMap := make(map[int]map[string]MenuItem)
@@ -36,7 +37,7 @@ func Merge(logger *zerolog.Logger, german plan.Plan, english plan.Plan) (locatio
 
 			for _, item := range day.Items {
 				menu := catMap[item.Category]
-				menu.Location = location
+				menu.Location = loc
 				menu.Day = timestamp
 				menu.Category = item.Category
 

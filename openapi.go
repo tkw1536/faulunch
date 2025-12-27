@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/swaggest/swgui/v5emb"
+	"github.com/tkw1536/faulunch/internal/location"
 	"github.com/tkw1536/faulunch/internal/ltime"
 
 	_ "embed"
@@ -101,7 +102,7 @@ func (server *Server) handleAPILocations(w http.ResponseWriter, r *http.Request)
 }
 
 func (server *Server) handleAPIMenuDays(w http.ResponseWriter, r *http.Request) {
-	location := Location(r.PathValue("location"))
+	location := location.Location(r.PathValue("location"))
 
 	logger := server.Logger.With().Str("route", "API.MenuDays").Str("location", string(location)).Logger()
 
@@ -154,7 +155,7 @@ func (server *Server) handleAPIMenuDays(w http.ResponseWriter, r *http.Request) 
 
 func (server *Server) handleAPIMenu(w http.ResponseWriter, r *http.Request) {
 	day := ltime.ParseDay(r.PathValue("day"))
-	location := Location(r.PathValue("location"))
+	location := location.Location(r.PathValue("location"))
 
 	logger := server.Logger.With().Str("route", "API.Menu").Str("location", string(location)).Stringer("day", day).Logger()
 

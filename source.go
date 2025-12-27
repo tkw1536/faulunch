@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"github.com/tkw1536/faulunch/internal/location"
 	"github.com/tkw1536/faulunch/internal/plan"
 	"gorm.io/gorm"
 )
@@ -26,8 +27,8 @@ func FetchAndSyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
 		logger.Err(res).Msg("logging sync event")
 	}()
 
-	for _, location := range Locations() {
-		if FetchAndSync(logger, db, location) != nil {
+	for _, loc := range location.Locations() {
+		if FetchAndSync(logger, db, loc) != nil {
 			failed = true
 		}
 	}
@@ -40,15 +41,15 @@ func FetchAndSyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
 }
 
 // FetchAndSync is like calling Fetch() and then Sync() for the given location.
-func FetchAndSync(logger *zerolog.Logger, db *gorm.DB, location Location) error {
-	german, err := Fetch(location, false)
-	logger.Err(err).Str("location", string(location)).Bool("english", false).Msg("fetching data")
+func FetchAndSync(logger *zerolog.Logger, db *gorm.DB, loc location.Location) error {
+	german, err := Fetch(loc, false)
+	logger.Err(err).Str("location", string(loc)).Bool("english", false).Msg("fetching data")
 	if err != nil {
 		return err
 	}
 
-	english, err := Fetch(location, true)
-	logger.Err(err).Str("location", string(location)).Bool("english", true).Msg("fetching data")
+	english, err := Fetch(loc, true)
+	logger.Err(err).Str("location", string(loc)).Bool("english", true).Msg("fetching data")
 	if err != nil {
 		return err
 	}
@@ -59,8 +60,8 @@ func FetchAndSync(logger *zerolog.Logger, db *gorm.DB, location Location) error 
 var errInvalidStatusCode = errors.New("invalid response code")
 
 // Fetch fetches a plan for the given location and language.
-func Fetch(location Location, english bool) (plan plan.Plan, err error) {
-	res, err := http.Get(PlanURL(location, english))
+func Fetch(loc location.Location, english bool) (plan plan.Plan, err error) {
+	res, err := http.Get(PlanURL(loc, english))
 	if err != nil {
 		return plan, err
 	}
@@ -73,12 +74,12 @@ func Fetch(location Location, english bool) (plan plan.Plan, err error) {
 }
 
 // PlanURL returns the url of a given plan and language
-func PlanURL(location Location, english bool) string {
+func PlanURL(loc location.Location, english bool) string {
 	dest := "https://www.max-manager.de/daten-extern/sw-erlangen-nuernberg/xml/"
 	if english {
 		dest += "en/"
 	}
-	dest += string(location) + ".xml"
+	dest += string(loc) + ".xml"
 
 	return dest
 }

@@ -7,6 +7,7 @@ import (
 
 	"slices"
 
+	"github.com/tkw1536/faulunch/internal/location"
 	"github.com/tkw1536/faulunch/internal/ltime"
 	"gorm.io/gorm"
 )
@@ -18,11 +19,11 @@ type API struct {
 
 // Locations returns the list of available locations in the database.
 // They are sorted by their type.
-func (api *API) Locations() (locations []Location, err error) {
+func (api *API) Locations() (locations []location.Location, err error) {
 	res := api.DB.Model(&MenuItem{}).Distinct("Location").Pluck("location", &locations)
 	err = res.Error
 
-	slices.SortStableFunc(locations, func(a, b Location) int {
+	slices.SortStableFunc(locations, func(a, b location.Location) int {
 		return a.Description().Cmp(b.Description())
 	})
 
@@ -42,7 +43,7 @@ type Pagination struct {
 
 var errNoCurrent = errors.New("no current item")
 
-func (api *API) CurrentDay(location Location, query ltime.Day) (day ltime.Day, err error) {
+func (api *API) CurrentDay(location location.Location, query ltime.Day) (day ltime.Day, err error) {
 	var days []ltime.Day
 	res := api.DB.Model(&MenuItem{}).
 		Where("Location = ? AND Day <= ? ", location, query).
@@ -61,7 +62,7 @@ func (api *API) CurrentDay(location Location, query ltime.Day) (day ltime.Day, e
 }
 
 // DayPagination builds up day-based pagination for the given query.
-func (api *API) DayPagination(location Location, query ltime.Day, size int) (pagination Pagination, err error) {
+func (api *API) DayPagination(location location.Location, query ltime.Day, size int) (pagination Pagination, err error) {
 	if size < 1 {
 		panic("DayPagination: limit < 1")
 	}
@@ -168,13 +169,13 @@ func reverse[S ~[]E, E any](s S) {
 }
 
 // KnowsLocation checks if at least one time for the given location is known
-func (api *API) KnowsLocation(location Location) (exists bool, err error) {
+func (api *API) KnowsLocation(location location.Location) (exists bool, err error) {
 	err = api.DB.Model(&MenuItem{}).Where("Location = ?", location).Select("count(*) > 0").Find(&exists).Error
 	return
 }
 
 // Days returns the days with an explicit menu starting at day, and including (at most) the next count days.
-func (api *API) Days(location Location, day ltime.Day, count int) (days []ltime.Day, err error) {
+func (api *API) Days(location location.Location, day ltime.Day, count int) (days []ltime.Day, err error) {
 	start := day.Normalize()
 	end := day.Add(count)
 
@@ -186,7 +187,7 @@ func (api *API) Days(location Location, day ltime.Day, count int) (days []ltime.
 // MenuItems returns the menu items for the given day and time.
 // They are sorted by category.
 // If it does not exist, an empty menu item is returned.
-func (api *API) MenuItems(location Location, day ltime.Day) (items []MenuItem, err error) {
+func (api *API) MenuItems(location location.Location, day ltime.Day) (items []MenuItem, err error) {
 	res := api.DB.Model(&MenuItem{}).Where("Location = ? AND day = ?", location, day).Order("Category ASC").Find(&items)
 	slices.SortStableFunc(items, func(a, b MenuItem) int { return a.Cmp(b) })
 	err = res.Error

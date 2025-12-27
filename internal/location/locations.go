@@ -1,5 +1,5 @@
 //spellchecker:words faulunch
-package faulunch
+package location
 
 //spellchecker:words encoding json html template github faulunch internal
 import (
