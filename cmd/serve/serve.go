@@ -3,9 +3,12 @@ package main
 
 //spellchecker:words flag http regexp strings time github glebarez sqlite zerolog tdewolff minify html faulunch gorm
 import (
+	"context"
+	"errors"
 	"flag"
 	"net/http"
 	"os"
+	"os/signal"
 	"regexp"
 	"strings"
 	"time"
@@ -20,6 +23,12 @@ import (
 	"github.com/tkw1536/faulunch"
 	"gorm.io/gorm"
 )
+
+var globalContext context.Context
+
+func init() {
+	globalContext, _ = signal.NotifyContext(context.Background(), os.Interrupt)
+}
 
 func main() {
 	args := flag.Args()
@@ -56,7 +65,7 @@ func main() {
 	if flagAutoSync > 0 {
 		go func() {
 			for {
-				failed := faulunch.FetchAndSyncAll(&log, db)
+				failed := faulunch.FetchAndSyncAll(globalContext, &log, db)
 				if failed {
 					log.Error().Msg("failed to sync")
 				}
@@ -64,7 +73,7 @@ func main() {
 			}
 		}()
 	} else {
-		faulunch.RefreshComputedFields(&log, db)
+		faulunch.RefreshComputedFields(globalContext, &log, db)
 	}
 
 	// register a close once we're done
@@ -77,10 +86,10 @@ func main() {
 		defer db.Close()
 	}
 
-	// create a server
-	var server http.Handler
+	// create a handler
+	var handler http.Handler
 	{
-		server = &faulunch.Server{
+		handler = &faulunch.Server{
 			API: faulunch.API{
 				DB: db,
 			},
@@ -100,10 +109,10 @@ func main() {
 		m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
 		m.AddFuncRegexp(regexp.MustCompile("[/+]xml$"), xml.Minify) // for MathML
 
-		regular := server
+		regular := handler
 		minify := m.Middleware(regular)
 
-		server = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// prevent api resources from being minified
 			if r.URL.Path != "/api/" && strings.HasPrefix(r.URL.Path, "/api/") {
 				regular.ServeHTTP(w, r)
@@ -115,10 +124,33 @@ func main() {
 	}
 
 	// start listening
+	server := &http.Server{Addr: flagAddr, Handler: handler}
 	{
+		// allow graceful shutdown on interrupt
+		done := make(chan struct{})
+		go func() {
+			defer close(done)
+
+			<-globalContext.Done()
+			log.Info().Str("addr", flagAddr).Msg("server shutting down")
+
+			timeout, cancel := context.WithTimeout(globalContext, 10*time.Second)
+			defer cancel()
+			if err := server.Shutdown(timeout); err != nil {
+				log.Err(err).Str("addr", flagAddr).Msg("server failed to shutdown")
+			}
+		}()
+
 		log.Info().Str("addr", flagAddr).Bool("minify", !flagNoMinify).Msg("server listening")
-		err := http.ListenAndServe(flagAddr, server)
-		log.Err(err).Str("addr", flagAddr).Msg("server failed to listen")
+		err := server.ListenAndServe()
+
+		if !errors.Is(err, http.ErrServerClosed) {
+			log.Err(err).Str("addr", flagAddr).Msg("server failed to listen")
+			return
+		}
+
+		<-done
+		log.Info().Msg("server shutdown complete")
 	}
 
 }

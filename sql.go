@@ -65,14 +65,17 @@ type MenuItem struct {
 }
 
 var categoryTranslations = map[string]string{
-	"Essen":          "Meal",
-	"Aktionsessen":   "Special Meal",
-	"Aktion":         "Special",
-	"Suppe":          "Soup",
-	"Suppen":         "Soups",
-	"SB-Theke":       "Self-Service Counter",
-	"Tagesangebot":   "Daily Special",
-	"Tipp des Tages": "Tip Of The Day",
+	"Essen":             "Meal",
+	"Aktionsessen":      "Special Meal",
+	"Aktion":            "Special",
+	"Suppe":             "Soup",
+	"Suppen":            "Soups",
+	"SB-Theke":          "Self-Service Counter",
+	"Tagesangebot":      "Daily Special",
+	"Tipp des Tages":    "Tip Of The Day",
+	"Pizza":             "Pizza",
+	"vegetarisch/vegan": "Vegetarian/Vegan",
+	"Fleisch/Fisch":     "Meat/Fish",
 }
 
 func (m *MenuItem) UpdateComputedFields(logger *zerolog.Logger) {

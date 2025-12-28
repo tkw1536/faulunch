@@ -3,6 +3,7 @@ package faulunch
 
 //spellchecker:words encoding errors http time github zerolog gorm
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -15,23 +16,23 @@ import (
 // FetchAndSyncAll fetches and syncs all items into the database.
 // It then updates computed fields.
 // Returns a boolean indicating failure.
-func FetchAndSyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
+func FetchAndSyncAll(ctx context.Context, logger *zerolog.Logger, db *gorm.DB) (failed bool) {
 	var se SyncEvent
 	se.Begin()
 	defer func() {
 		se.Finish()
 
-		res := se.Store(db)
+		res := se.Store(ctx, db)
 		logger.Err(res).Msg("logging sync event")
 	}()
 
 	for _, loc := range location.Locations() {
-		if FetchAndSync(logger, db, loc) != nil {
+		if FetchAndSync(ctx, logger, db, loc) != nil {
 			failed = true
 		}
 	}
 
-	if err := RefreshComputedFields(logger, db); err != nil {
+	if err := RefreshComputedFields(ctx, logger, db); err != nil {
 		failed = true
 	}
 
@@ -39,14 +40,14 @@ func FetchAndSyncAll(logger *zerolog.Logger, db *gorm.DB) (failed bool) {
 }
 
 // FetchAndSync is like calling Fetch() and then Sync() for the given location.
-func FetchAndSync(logger *zerolog.Logger, db *gorm.DB, loc location.Location) error {
-	german, err := plan.Fetch(http.DefaultClient, loc, false)
+func FetchAndSync(ctx context.Context, logger *zerolog.Logger, db *gorm.DB, loc location.Location) error {
+	german, err := plan.Fetch(ctx, http.DefaultClient, loc, false)
 	logger.Err(err).Str("location", string(loc)).Bool("english", false).Msg("fetching data")
 	if err != nil {
 		return err
 	}
 
-	english, err := plan.Fetch(http.DefaultClient, loc, true)
+	english, err := plan.Fetch(ctx, http.DefaultClient, loc, true)
 	logger.Err(err).Str("location", string(loc)).Bool("english", true).Msg("fetching data")
 	if err != nil {
 		return err
@@ -93,7 +94,7 @@ func Sync(logger *zerolog.Logger, db *gorm.DB, german, english plan.Plan) error 
 }
 
 // RefreshComputedFields refreshes all computed fields in the database.
-func RefreshComputedFields(logger *zerolog.Logger, db *gorm.DB) error {
+func RefreshComputedFields(ctx context.Context, logger *zerolog.Logger, db *gorm.DB) error {
 	pageSize := 100
 
 	return db.Transaction(func(tx *gorm.DB) error {

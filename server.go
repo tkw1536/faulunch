@@ -3,6 +3,7 @@ package faulunch
 
 //spellchecker:words embed html template http regexp strings sync time github zerolog faulunch internal golang text language
 import (
+	"context"
 	"embed"
 	"html/template"
 	"net/http"
@@ -152,8 +153,8 @@ type globalContext struct {
 	LastSync time.Time
 }
 
-func (gc *globalContext) loadLastSync(api *API) error {
-	lastSync, err := api.LastSync()
+func (gc *globalContext) loadLastSync(ctx context.Context, api *API) error {
+	lastSync, err := api.LastSync(ctx)
 	if err != nil {
 		return err
 
@@ -218,7 +219,7 @@ func (server *Server) HandleIndex(english bool, w http.ResponseWriter, r *http.R
 			},
 			Locations: results,
 		}
-		if err := context.loadLastSync(&server.API); err != nil {
+		if err := context.loadLastSync(r.Context(), &server.API); err != nil {
 			logger.Debug().Err(err).Msg("LoadLastSync")
 		}
 
@@ -288,7 +289,7 @@ func (server *Server) HandleMenu(loc location.Location, day ltime.Day, english b
 		Day:      day,
 	}
 
-	if err := mc.loadLastSync(&server.API); err != nil {
+	if err := mc.loadLastSync(r.Context(), &server.API); err != nil {
 		logger.Debug().Err(err).Msg("LoadLastSync")
 	}
 

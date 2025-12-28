@@ -161,7 +161,7 @@ func TestFetch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := plan.Fetch(tt.client, tt.loc, tt.english)
+			got, err := plan.Fetch(t.Context(), tt.client, tt.loc, tt.english)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Fetch() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -73,7 +73,7 @@ func (server *Server) handleAPISync(w http.ResponseWriter, r *http.Request) {
 	logger := server.Logger.With().Str("route", "API.Sync").Logger()
 
 	// fetch all the items
-	sync, err := server.API.LastSync()
+	sync, err := server.API.LastSync(r.Context())
 	logger.Trace().Err(err).Msg("API.Sync")
 
 	if err != nil {

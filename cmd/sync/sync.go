@@ -1,9 +1,11 @@
 //spellchecker:words main
 package main
 
-//spellchecker:words time github glebarez sqlite zerolog faulunch gorm
+//spellchecker:words time github glebarez sqlite zerolog faulunch gorm signal
 import (
+	"context"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/glebarez/sqlite"
@@ -11,6 +13,12 @@ import (
 	"github.com/tkw1536/faulunch"
 	"gorm.io/gorm"
 )
+
+var globalContext context.Context
+
+func init() {
+	globalContext, _ = signal.NotifyContext(context.Background(), os.Interrupt)
+}
 
 func main() {
 	if len(os.Args) != 2 {
@@ -48,7 +56,7 @@ func main() {
 
 	// fetch all the items
 	{
-		failed := faulunch.FetchAndSyncAll(&log, db)
+		failed := faulunch.FetchAndSyncAll(globalContext, &log, db)
 		if failed {
 			panic("failed to sync all locations")
 		}

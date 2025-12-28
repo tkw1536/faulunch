@@ -1,6 +1,7 @@
 package plan
 
 import (
+	"context"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -22,8 +23,8 @@ type ClientLike interface {
 }
 
 // Fetch fetches a plan for the given location and language.
-func Fetch(client ClientLike, loc location.Location, english bool) (plan Plan, err error) {
-	req, err := http.NewRequest(http.MethodGet, PlanURL(loc, english), nil)
+func Fetch(ctx context.Context, client ClientLike, loc location.Location, english bool) (plan Plan, err error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, PlanURL(loc, english), nil)
 	if err != nil {
 		return plan, fmt.Errorf("failed to create request: %w", err)
 	}

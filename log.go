@@ -3,7 +3,9 @@ package faulunch
 
 //spellchecker:words errors time gorm
 import (
+	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -28,22 +30,16 @@ func (se *SyncEvent) Finish() {
 }
 
 // Store stores this SyncEvent in the database
-func (se *SyncEvent) Store(db *gorm.DB) error {
-	res := db.Model(&SyncEvent{}).Create(se)
-	return res.Error
+func (se *SyncEvent) Store(ctx context.Context, db *gorm.DB) error {
+	err := gorm.G[SyncEvent](db).Create(ctx, se)
+	if err != nil {
+		return fmt.Errorf("failed to store sync event: %w", err)
+	}
+	return nil
 }
 
 var ErrNoSync = errors.New("database was never synced")
 
-func (api *API) LastSync() (se SyncEvent, err error) {
-	res := api.DB.Model(&SyncEvent{}).Order("Stop DESC").First(&se)
-	if res.Error != nil {
-		return se, res.Error
-	}
-
-	if res.RowsAffected == 0 {
-		return se, ErrNoSync
-	}
-
-	return se, nil
+func (api *API) LastSync(ctx context.Context) (se SyncEvent, err error) {
+	return gorm.G[SyncEvent](api.DB).Order("Stop DESC").First(ctx)
 }
