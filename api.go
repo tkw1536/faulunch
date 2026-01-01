@@ -4,6 +4,7 @@ package faulunch
 //spellchecker:words errors slices gorm
 import (
 	"errors"
+	"net/http"
 
 	"slices"
 
@@ -15,6 +16,9 @@ import (
 // API implements querying data from the database.
 type API struct {
 	DB *gorm.DB
+
+	// Copier copies the current database content to the given http.ResponseWriter.
+	Copier func(w http.ResponseWriter, r *http.Request) error
 }
 
 // Locations returns the list of available locations in the database.

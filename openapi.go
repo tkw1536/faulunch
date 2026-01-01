@@ -32,6 +32,7 @@ func (server *Server) registerAPIRoutes() {
 	server.mux.HandleFunc("GET /api/v1/locations", server.handleAPILocations)
 	server.mux.HandleFunc("GET /api/v1/menu/{location}", server.handleAPIMenuDays)
 	server.mux.HandleFunc("GET /api/v1/menu/{location}/{day}", server.handleAPIMenu)
+	server.mux.HandleFunc("GET /api/v1/sqlite", server.handleAPIsqlite)
 }
 
 const notFoundError = `{"status":"Not Found"}`
@@ -174,4 +175,21 @@ func (server *Server) handleAPIMenu(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
+}
+
+func (server *Server) handleAPIsqlite(w http.ResponseWriter, r *http.Request) {
+	if server.API.Copier == nil {
+		server.handleNotFound(w)
+		return
+	}
+
+	logger := server.Logger.With().Str("route", "API.sqlite").Logger()
+
+	err := server.API.Copier(w, r)
+	logger.Trace().Err(err).Msg("API.sqlite")
+
+	if err != nil {
+		server.handleInternalServerError(w)
+		return
+	}
 }

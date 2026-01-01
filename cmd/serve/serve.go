@@ -21,6 +21,7 @@ import (
 	"github.com/tdewolff/minify/js"
 	"github.com/tdewolff/minify/xml"
 	"github.com/tkw1536/faulunch"
+	"github.com/tkw1536/faulunch/internal/export"
 	"gorm.io/gorm"
 )
 
@@ -76,6 +77,7 @@ func main() {
 		faulunch.RefreshComputedFields(globalContext, &log, db)
 	}
 
+	var copier func(w http.ResponseWriter, r *http.Request) error
 	// register a close once we're done
 	{
 		db, err := db.DB()
@@ -84,6 +86,20 @@ func main() {
 			panic(err)
 		}
 		defer db.Close()
+
+		if !flagNoExport {
+			log.Info().Msg("enabling sqlite database export")
+
+			var closer func() error
+			copier, closer = export.NewExporter(globalContext, &log, db, "SELECT MAX(stop) FROM sync_events")
+			defer func() {
+				err := closer()
+				if err == nil {
+					return
+				}
+				log.Err(err).Msg("failed to remove temporary database export")
+			}()
+		}
 	}
 
 	// create a handler
@@ -91,7 +107,8 @@ func main() {
 	{
 		handler = &faulunch.Server{
 			API: faulunch.API{
-				DB: db,
+				DB:     db,
+				Copier: copier,
 			},
 			Logger: &log,
 			Legal: faulunch.ServerLegal{
@@ -157,6 +174,7 @@ func main() {
 
 var flagAutoSync time.Duration
 var flagDebug bool = false
+var flagNoExport bool = false
 var flagNoMinify bool = false
 var flagAddr string = "127.0.0.1:3000"
 var flagLink string = ""
@@ -174,4 +192,6 @@ func init() {
 	flag.StringVar(&flagDEText, "legal-de", flagDEText, "text for german legal link")
 	flag.StringVar(&flagENText, "legal-en", flagENText, "text for english legal link")
 	flag.StringVar(&flagLink, "legal-link", flagLink, "url for legal link")
+
+	flag.BoolVar(&flagNoExport, "no-export", flagNoExport, "Disable the /api/v1/sqlite endpoint")
 }
