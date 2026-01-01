@@ -134,8 +134,8 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		server.mux.HandleFunc("GET /de/{location}/{day}", func(w http.ResponseWriter, r *http.Request) {
 			day := ltime.ParseDay(r.PathValue("day"))
-			location := location.Location(r.PathValue("location"))
-			server.HandleMenu(location, day, false, w, r)
+			loc := location.Location(r.PathValue("location"))
+			server.HandleMenu(loc, day, false, w, r)
 		})
 
 		// API
