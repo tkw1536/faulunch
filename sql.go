@@ -146,6 +146,8 @@ func (m MenuItem) catScore() int {
 		return 0
 	}
 }
+
+// Cmp compares two menu items by their "category".
 func (m MenuItem) Cmp(other MenuItem) int {
 	ours, theirs := m.catScore(), other.catScore()
 	if ours < theirs {
