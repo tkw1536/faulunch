@@ -29,6 +29,9 @@ func Fetch(ctx context.Context, client ClientLike, loc location.Location, englis
 		return plan, fmt.Errorf("failed to create request: %w", err)
 	}
 	res, err := client.Do(req)
+	if err != nil {
+		return plan, fmt.Errorf("failed to fetch plan: %w", err)
+	}
 	if res.StatusCode != http.StatusOK {
 		return plan, fmt.Errorf("failed to fetch plan: %w", errInvalidStatusCode)
 	}
